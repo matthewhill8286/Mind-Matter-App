@@ -1,0 +1,65 @@
+import React from "react";
+import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
+
+type ChipsProps = {
+  options: string[];
+  value?: string | string[];
+  onChange: (value: string | string[]) => void;
+  multiple?: boolean;
+};
+
+export default function Chips({ options, value, onChange, multiple = false }: ChipsProps) {
+  const selected = Array.isArray(value) ? value : value ? [value] : [];
+
+  function toggle(option: string) {
+    if (multiple) {
+      if (selected.includes(option)) onChange(selected.filter((v) => v !== option));
+      else onChange([...selected, option]);
+    } else {
+      onChange(option);
+    }
+  }
+
+  return (
+    <View style={styles.container}>
+      {options.map((option) => {
+        const isActive = selected.includes(option);
+        return <Chip key={option} label={option} active={isActive} onPress={() => toggle(option)} />;
+      })}
+    </View>
+  );
+}
+
+function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  const scale = React.useRef(new Animated.Value(1)).current;
+
+  function pressIn() {
+    Animated.spring(scale, { toValue: 0.96, useNativeDriver: true }).start();
+  }
+  function pressOut() {
+    Animated.spring(scale, { toValue: 1, friction: 4, useNativeDriver: true }).start();
+  }
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={pressIn}
+        onPressOut={pressOut}
+        style={[styles.chip, active && styles.activeChip]}
+        accessibilityRole="button"
+        accessibilityState={{ selected: active }}
+      >
+        <Text style={[styles.text, active && styles.activeText]}>{label}</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 16 },
+  chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 999, backgroundColor: "#f2f2f2" },
+  activeChip: { backgroundColor: "#a07b55" },
+  text: { fontSize: 15, fontWeight: "700", color: "#333" },
+  activeText: { color: "white" },
+});
