@@ -18,8 +18,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "output": "static",
@@ -38,7 +37,9 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      ["expo-audio", { "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone." }],
+      ["expo-video", { "supportsBackgroundPlayback": true, "supportsPictureInPicture": true }]
     ],
     "experiments": {
       "typedRoutes": true,

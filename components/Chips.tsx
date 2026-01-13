@@ -1,5 +1,7 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors, UI } from "@/constants/theme";
 
 type ChipsProps = {
   options: string[];
@@ -31,6 +33,8 @@ export default function Chips({ options, value, onChange, multiple = false }: Ch
 }
 
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
   const scale = React.useRef(new Animated.Value(1)).current;
 
   function pressIn() {
@@ -46,11 +50,23 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
         onPress={onPress}
         onPressIn={pressIn}
         onPressOut={pressOut}
-        style={[styles.chip, active && styles.activeChip]}
+        style={[
+          styles.chip,
+          { backgroundColor: colors.inputBg },
+          active && { backgroundColor: colors.primary }
+        ]}
         accessibilityRole="button"
         accessibilityState={{ selected: active }}
       >
-        <Text style={[styles.text, active && styles.activeText]}>{label}</Text>
+        <Text
+          style={[
+            styles.text,
+            { color: colors.text },
+            active && { color: colors.onPrimary }
+          ]}
+        >
+          {label}
+        </Text>
       </Pressable>
     </Animated.View>
   );
@@ -58,8 +74,6 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
 
 const styles = StyleSheet.create({
   container: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 16 },
-  chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 999, backgroundColor: "#f2f2f2" },
-  activeChip: { backgroundColor: "#a07b55" },
-  text: { fontSize: 15, fontWeight: "700", color: "#333" },
-  activeText: { color: "white" },
+  chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: UI.radius.pill },
+  text: { fontSize: 15, fontWeight: "700" },
 });

@@ -1,9 +1,24 @@
 import { Tabs } from "expo-router";
 import React from "react";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
 
 export default function TabsLayout() {
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
+
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: colors.tabBarBg,
+          borderTopColor: colors.border,
+        },
+        tabBarActiveTintColor: colors.tabIconSelected,
+        tabBarInactiveTintColor: colors.tabIconDefault,
+      }}
+    >
       {/* Visible tabs */}
       <Tabs.Screen name="home" options={{ title: "Home" }} />
       <Tabs.Screen name="chat" options={{ title: "Chat" }} />

@@ -3,6 +3,8 @@ import { View, Text, Pressable, ScrollView, TextInput, Alert } from "react-nativ
 import ScreenHeader from "@/components/ScreenHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors, UI } from "@/constants/theme";
 
 const STORAGE_KEY = "stress:kit:v1";
 
@@ -24,8 +26,17 @@ const DEFAULT_KIT: StressKit = {
 
 export default function StressPlan() {
   const router = useRouter();
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
   const [kit, setKit] = useState<StressKit>(DEFAULT_KIT);
   const [draft, setDraft] = useState<StressKit>(DEFAULT_KIT);
+
+  const inputStyle = {
+    padding: 12,
+    borderRadius: UI.radius.md,
+    backgroundColor: colors.inputBg,
+    color: colors.text,
+  };
 
   useEffect(() => {
     (async () => {
@@ -72,15 +83,15 @@ export default function StressPlan() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f6f4f2", padding: 24, paddingTop: 18 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, padding: UI.spacing.xl, paddingTop: 18 }}>
       <ScreenHeader
         title="Stress Management"
         subtitle="Quick tools for calming your body and clearing your mind."
       />
       <ScrollView style={{ flex: 1, marginTop: 14 }} contentContainerStyle={{ paddingBottom: 24 }}>
-        <View style={{ backgroundColor: "white", borderRadius: 18, padding: 16 }}>
-          <Text style={{ fontSize: 18, fontWeight: "900" }}>Your Stress Kit</Text>
-          <Text style={{ opacity: 0.7, marginTop: 6 }}>
+        <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 16 }}>
+          <Text style={{ fontSize: 18, fontWeight: "900", color: colors.text }}>Your Stress Kit</Text>
+          <Text style={{ color: colors.mutedText, marginTop: 6 }}>
             Personalize a quick plan for what helps you when stress spikes.
           </Text>
         </View>
@@ -90,7 +101,8 @@ export default function StressPlan() {
             value={draft.quickPhrase ?? ""}
             onChangeText={(t) => setDraft((p) => ({ ...p, quickPhrase: t }))}
             placeholder="e.g., I can handle one small step."
-            style={input}
+            placeholderTextColor={colors.placeholder}
+            style={inputStyle}
           />
         </Block>
 
@@ -129,17 +141,18 @@ export default function StressPlan() {
             value={draft.notes ?? ""}
             onChangeText={(t) => setDraft((p) => ({ ...p, notes: t }))}
             placeholder="Anything else that helps (music, places, reminders)…"
-            style={[input, { height: 110 }]}
+            placeholderTextColor={colors.placeholder}
+            style={[inputStyle, { height: 110 }]}
             multiline
           />
         </Block>
 
         <View style={{ flexDirection: "row", gap: 12, marginTop: 12 }}>
-          <Pressable onPress={save} style={{ flex: 1, backgroundColor: "#a07b55", padding: 16, borderRadius: 18, alignItems: "center" }}>
-            <Text style={{ color: "white", fontWeight: "900" }}>Save</Text>
+          <Pressable onPress={save} style={{ flex: 1, backgroundColor: colors.primary, padding: 16, borderRadius: UI.radius.lg, alignItems: "center" }}>
+            <Text style={{ color: colors.onPrimary, fontWeight: "900" }}>Save</Text>
           </Pressable>
-          <Pressable onPress={() => router.back()} style={{ flex: 1, backgroundColor: "#eee", padding: 16, borderRadius: 18, alignItems: "center" }}>
-            <Text style={{ fontWeight: "900" }}>Back</Text>
+          <Pressable onPress={() => router.back()} style={{ flex: 1, backgroundColor: colors.divider, padding: 16, borderRadius: UI.radius.lg, alignItems: "center" }}>
+            <Text style={{ fontWeight: "900", color: colors.text }}>Back</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -148,9 +161,12 @@ export default function StressPlan() {
 }
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
+
   return (
-    <View style={{ backgroundColor: "white", borderRadius: 18, padding: 14, marginTop: 12 }}>
-      <Text style={{ fontWeight: "900" }}>{title}</Text>
+    <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14, marginTop: 12 }}>
+      <Text style={{ fontWeight: "900", color: colors.text }}>{title}</Text>
       <View style={{ marginTop: 10, gap: 10 }}>{children}</View>
     </View>
   );
@@ -173,23 +189,39 @@ function EditableList({
   onRemove: (idx: number) => void;
   placeholder: string;
 }) {
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
+
+  const inputStyle = {
+    padding: 12,
+    borderRadius: UI.radius.md,
+    backgroundColor: colors.inputBg,
+    color: colors.text,
+  };
+
   return (
-    <View style={{ backgroundColor: "white", borderRadius: 18, padding: 14, marginTop: 12 }}>
-      <Text style={{ fontWeight: "900" }}>{title}</Text>
+    <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14, marginTop: 12 }}>
+      <Text style={{ fontWeight: "900", color: colors.text }}>{title}</Text>
       <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
-        <TextInput value={inputValue} onChangeText={setInputValue} placeholder={placeholder} style={[input, { flex: 1, marginTop: 0 }]} />
-        <Pressable onPress={onAdd} style={{ backgroundColor: "#a07b55", paddingHorizontal: 14, borderRadius: 16, justifyContent: "center" }}>
-          <Text style={{ color: "white", fontWeight: "900" }}>Add</Text>
+        <TextInput
+          value={inputValue}
+          onChangeText={setInputValue}
+          placeholder={placeholder}
+          placeholderTextColor={colors.placeholder}
+          style={[inputStyle, { flex: 1 }]}
+        />
+        <Pressable onPress={onAdd} style={{ backgroundColor: colors.primary, paddingHorizontal: 14, borderRadius: UI.radius.md, justifyContent: "center" }}>
+          <Text style={{ color: colors.onPrimary, fontWeight: "900" }}>Add</Text>
         </Pressable>
       </View>
 
       <View style={{ marginTop: 10, gap: 8 }}>
-        {items.length === 0 ? <Text style={{ opacity: 0.6 }}>No items yet.</Text> : null}
+        {items.length === 0 ? <Text style={{ color: colors.subtleText }}>No items yet.</Text> : null}
         {items.map((it, idx) => (
           <View key={idx} style={{ flexDirection: "row", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-            <Text style={{ flex: 1, opacity: 0.85 }}>{it}</Text>
-            <Pressable onPress={() => onRemove(idx)} style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, backgroundColor: "#f2f2f2" }}>
-              <Text style={{ fontWeight: "900", opacity: 0.65 }}>Remove</Text>
+            <Text style={{ flex: 1, color: colors.text }}>{it}</Text>
+            <Pressable onPress={() => onRemove(idx)} style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: UI.radius.sm, backgroundColor: colors.divider }}>
+              <Text style={{ fontWeight: "900", color: colors.mutedText }}>Remove</Text>
             </Pressable>
           </View>
         ))}
@@ -197,5 +229,3 @@ function EditableList({
     </View>
   );
 }
-
-const input: any = { padding: 12, borderRadius: 16, backgroundColor: "#f2f2f2" };

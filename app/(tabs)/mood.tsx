@@ -6,6 +6,8 @@ import MoodChart from "@/components/MoodChart";
 import { MoodCheckIn } from "@/lib/mood";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch, fetchMoodCheckIns, addMoodCheckIn, deleteMoodCheckIn, showAlert } from "@/store";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors, UI } from "@/constants/theme";
 
 const MOODS: MoodCheckIn["mood"][] = ["Great", "Good", "Okay", "Low", "Bad"];
 const ENERGY = ["1", "2", "3", "4", "5"];
@@ -21,6 +23,8 @@ function moodToScore(m: MoodCheckIn["mood"]) {
 
 export default function Mood() {
   const dispatch = useDispatch<AppDispatch>();
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
   const items = useSelector((s: RootState) => s.app.moodCheckIns);
   const [mood, setMood] = useState<MoodCheckIn["mood"]>("Okay");
   const [energy, setEnergy] = useState<MoodCheckIn["energy"]>(3);
@@ -28,6 +32,13 @@ export default function Mood() {
   const [note, setNote] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagText, setTagText] = useState("");
+
+  const inputStyle = {
+    padding: 12,
+    borderRadius: UI.radius.md,
+    backgroundColor: colors.inputBg,
+    color: colors.text,
+  };
 
   useEffect(() => {
     dispatch(fetchMoodCheckIns());
@@ -86,7 +97,7 @@ export default function Mood() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f6f4f2", padding: 24, paddingTop: 18 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, padding: UI.spacing.xl, paddingTop: 18 }}>
       <ScrollView
         contentContainerStyle={{ paddingBottom: 24 }}
         keyboardShouldPersistTaps="handled"
@@ -98,50 +109,52 @@ export default function Mood() {
           <MoodChart items={items} />
 
           {insights ? (
-            <View style={{ backgroundColor: "white", borderRadius: 18, padding: 14 }}>
-              <Text style={{ fontWeight: "900" }}>Insights (last {insights.n})</Text>
-              <Text style={{ opacity: 0.7, marginTop: 6 }}>
+            <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14 }}>
+              <Text style={{ fontWeight: "900", color: colors.text }}>Insights (last {insights.n})</Text>
+              <Text style={{ color: colors.mutedText, marginTop: 6 }}>
                 Avg mood: {insights.avgMood.toFixed(1)} / 5  •  Avg stress: {insights.avgStress.toFixed(1)} / 10  •  Avg energy: {insights.avgEnergy.toFixed(1)} / 5
               </Text>
             </View>
           ) : (
-            <View style={{ backgroundColor: "white", borderRadius: 18, padding: 14 }}>
-              <Text style={{ fontWeight: "900" }}>Insights</Text>
-              <Text style={{ opacity: 0.7, marginTop: 6 }}>Add a few check-ins to see averages and trends.</Text>
+            <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14 }}>
+              <Text style={{ fontWeight: "900", color: colors.text }}>Insights</Text>
+              <Text style={{ color: colors.mutedText, marginTop: 6 }}>Add a few check-ins to see averages and trends.</Text>
             </View>
           )}
 
-          <View style={{ backgroundColor: "white", borderRadius: 18, padding: 14 }}>
-            <Text style={{ fontWeight: "900" }}>Today’s check-in</Text>
+          <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14 }}>
+            <Text style={{ fontWeight: "900", color: colors.text }}>Today’s check-in</Text>
 
-            <Text style={{ marginTop: 10, fontWeight: "900" }}>Mood</Text>
+            <Text style={{ marginTop: 10, fontWeight: "900", color: colors.text }}>Mood</Text>
             <Chips options={MOODS as any} value={mood} onChange={(v) => setMood(v as any)} />
 
-            <Text style={{ marginTop: 10, fontWeight: "900" }}>Energy</Text>
+            <Text style={{ marginTop: 10, fontWeight: "900", color: colors.text }}>Energy</Text>
             <Chips options={ENERGY} value={String(energy)} onChange={(v) => setEnergy(Number(v) as any)} />
 
-            <Text style={{ marginTop: 10, fontWeight: "900" }}>Stress</Text>
+            <Text style={{ marginTop: 10, fontWeight: "900", color: colors.text }}>Stress</Text>
             <Chips options={STRESS} value={String(stress)} onChange={(v) => setStress(Number(v) as any)} />
 
-            <Text style={{ marginTop: 10, fontWeight: "900" }}>Note (optional)</Text>
+            <Text style={{ marginTop: 10, fontWeight: "900", color: colors.text }}>Note (optional)</Text>
             <TextInput
               value={note}
               onChangeText={setNote}
               placeholder="Anything you want to remember?"
-              style={{ marginTop: 8, padding: 12, borderRadius: 16, backgroundColor: "#f2f2f2" }}
+              placeholderTextColor={colors.placeholder}
+              style={[inputStyle, { marginTop: 8 }]}
               multiline
             />
 
-            <Text style={{ marginTop: 10, fontWeight: "900" }}>Tags (optional)</Text>
+            <Text style={{ marginTop: 10, fontWeight: "900", color: colors.text }}>Tags (optional)</Text>
             <View style={{ flexDirection: "row", gap: 10, marginTop: 8 }}>
               <TextInput
                 value={tagText}
                 onChangeText={setTagText}
                 placeholder="Add a tag…"
-                style={{ flex: 1, padding: 12, borderRadius: 16, backgroundColor: "#f2f2f2" }}
+                placeholderTextColor={colors.placeholder}
+                style={[inputStyle, { flex: 1 }]}
               />
-              <Pressable onPress={addTag} style={{ backgroundColor: "#a07b55", paddingHorizontal: 14, borderRadius: 16, justifyContent: "center" }}>
-                <Text style={{ color: "white", fontWeight: "900" }}>Add</Text>
+              <Pressable onPress={addTag} style={{ backgroundColor: colors.primary, paddingHorizontal: 14, borderRadius: UI.radius.md, justifyContent: "center" }}>
+                <Text style={{ color: colors.onPrimary, fontWeight: "900" }}>Add</Text>
               </Pressable>
             </View>
 
@@ -150,22 +163,22 @@ export default function Mood() {
                 <Pressable
                   key={t}
                   onPress={() => setTags((p) => p.filter((x) => x !== t))}
-                  style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: "#f2f2f2" }}
+                  style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: UI.radius.pill, backgroundColor: colors.divider }}
                 >
-                  <Text style={{ fontWeight: "800", opacity: 0.75 }}>#{t}  ✕</Text>
+                  <Text style={{ fontWeight: "800", color: colors.mutedText }}>#{t}  ✕</Text>
                 </Pressable>
               ))}
-              {tags.length === 0 ? <Text style={{ opacity: 0.6 }}>No tags yet.</Text> : null}
+              {tags.length === 0 ? <Text style={{ color: colors.subtleText }}>No tags yet.</Text> : null}
             </View>
 
-            <Pressable onPress={saveCheckIn} style={{ marginTop: 12, backgroundColor: "#a07b55", padding: 14, borderRadius: 18, alignItems: "center" }}>
-              <Text style={{ color: "white", fontWeight: "900" }}>Save check-in</Text>
+            <Pressable onPress={saveCheckIn} style={{ marginTop: 12, backgroundColor: colors.primary, padding: 14, borderRadius: UI.radius.lg, alignItems: "center" }}>
+              <Text style={{ color: colors.onPrimary, fontWeight: "900" }}>Save check-in</Text>
             </Pressable>
           </View>
 
-          <View style={{ backgroundColor: "white", borderRadius: 18, padding: 14 }}>
-            <Text style={{ fontWeight: "900" }}>Recent check-ins</Text>
-            <Text style={{ opacity: 0.7, marginTop: 6 }}>Tap one to delete.</Text>
+          <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14 }}>
+            <Text style={{ fontWeight: "900", color: colors.text }}>Recent check-ins</Text>
+            <Text style={{ color: colors.mutedText, marginTop: 6 }}>Tap one to delete.</Text>
 
             <FlatList
               style={{ marginTop: 10 }}
@@ -174,15 +187,15 @@ export default function Mood() {
               scrollEnabled={false}
               contentContainerStyle={{ gap: 10, paddingBottom: 6 }}
               renderItem={({ item }) => (
-                <Pressable onPress={() => remove(item.id)} style={{ padding: 12, borderRadius: 16, backgroundColor: "#f6f4f2" }}>
+                <Pressable onPress={() => remove(item.id)} style={{ padding: 12, borderRadius: UI.radius.md, backgroundColor: colors.background }}>
                   <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
-                    <Text style={{ fontWeight: "900" }}>{item.mood}</Text>
-                    <Text style={{ opacity: 0.7 }}>{new Date(item.createdAt).toLocaleString()}</Text>
+                    <Text style={{ fontWeight: "900", color: colors.text }}>{item.mood}</Text>
+                    <Text style={{ color: colors.mutedText }}>{new Date(item.createdAt).toLocaleString()}</Text>
                   </View>
-                  <Text style={{ opacity: 0.7, marginTop: 6 }}>Energy {item.energy}/5 • Stress {item.stress}/10</Text>
-                  {item.note ? <Text style={{ opacity: 0.75, marginTop: 6 }} numberOfLines={2}>{item.note}</Text> : null}
+                  <Text style={{ color: colors.mutedText, marginTop: 6 }}>Energy {item.energy}/5 • Stress {item.stress}/10</Text>
+                  {item.note ? <Text style={{ color: colors.mutedText, marginTop: 6 }} numberOfLines={2}>{item.note}</Text> : null}
                   {(item.tags ?? []).length ? (
-                    <Text style={{ opacity: 0.6, marginTop: 6, fontWeight: "800" }}>
+                    <Text style={{ color: colors.subtleText, marginTop: 6, fontWeight: "800" }}>
                       {(item.tags ?? []).slice(0, 6).map((t) => `#${t}`).join(" ")}
                     </Text>
                   ) : null}

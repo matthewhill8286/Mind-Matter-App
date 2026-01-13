@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, FlatList } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { ISSUES, IssueKey } from "../../src/data/issues";
-import { suggestWithReasons } from "../../src/lib/suggestCategories";
+import { ISSUES, IssueKey } from "@/data/issues";
+import { suggestWithReasons } from "@/lib/suggestCategories";
 
 export default function SuggestedCategories() {
   const [suggested, setSuggested] = useState<{ key: IssueKey; score: number; reasons: string[] }[]>([]);
@@ -58,7 +58,7 @@ export default function SuggestedCategories() {
                   <View style={{ marginTop: 8 }}>
                     <Text style={{ fontWeight: "800", opacity: 0.75 }}>Why:</Text>
                     {why.reasons.slice(0, 2).map((r, idx) => (
-                      <Text key={idx} style={{ opacity: 0.7 }}>• {r}</Text>
+                      <Text key={r} style={{ opacity: 0.7 }}>• {r}</Text>
                     ))}
                   </View>
                 ) : null}

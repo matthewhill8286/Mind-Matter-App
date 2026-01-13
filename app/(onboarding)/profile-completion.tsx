@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ScoreCard from "../../src/components/ScoreCard";
+import ScoreCard from "@/components/ScoreCard";
 
 export default function ProfileCompletion() {
   const [name, setName] = useState<string | null>(null);

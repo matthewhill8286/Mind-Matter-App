@@ -1,11 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Pressable, FlatList, Alert } from "react-native";
+import { View, Text, Pressable, FlatList } from "react-native";
+import ScreenHeader from "@/components/ScreenHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { ISSUES, IssueKey } from "../../src/data/issues";
+import { ISSUES, IssueKey } from "@/data/issues";
+import { useDispatch } from "react-redux";
+import { AppDispatch, showAlert } from "@/store";
 
 export default function Settings() {
   const [selected, setSelected] = useState<Set<IssueKey>>(new Set());
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     (async () => {
@@ -18,17 +22,17 @@ export default function Settings() {
 
   async function save() {
     if (selectedArray.length === 0) {
-      Alert.alert("Select at least one section", "Choose one or more sections to continue.");
+      dispatch(showAlert({ title: "Select at least one section", message: "Choose one or more sections to continue." }));
       return;
     }
     await AsyncStorage.setItem("selectedIssues:v1", JSON.stringify(selectedArray));
-    Alert.alert("Saved", "Your preferences were updated.");
+    dispatch(showAlert({ title: "Saved", message: "Your preferences were updated." }));
     router.back();
   }
 
   return (
     <View style={{ flex: 1, padding: 24, backgroundColor: "#f6f4f2" }}>
-      <Text style={{ fontSize: 24, fontWeight: "900", marginTop: 34 }}>Settings</Text>
+      <ScreenHeader title="Settings" subtitle="Choose which sections you want to see." />
 
       <View style={{ marginTop: 14, backgroundColor: "white", borderRadius: 18, padding: 12, flex: 1 }}>
         <FlatList

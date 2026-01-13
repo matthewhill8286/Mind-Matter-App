@@ -1,4 +1,4 @@
-import { IssueKey } from "../data/issues";
+import { IssueKey } from "@/data/issues";
 
 export function suggestWithReasons(assessment: any): { key: IssueKey; score: number; reasons: string[] }[] {
   const scores = new Map<IssueKey, { score: number; reasons: string[] }>();
@@ -11,8 +11,8 @@ export function suggestWithReasons(assessment: any): { key: IssueKey; score: num
   }
 
   const mood = String(assessment?.mood ?? "").toLowerCase();
-  const stress = Number(assessment?.stress ?? NaN);
-  const sleep = Number(assessment?.sleep ?? NaN);
+  const stress = Number(assessment?.stress ?? Number.NaN);
+  const sleep = Number(assessment?.sleep ?? Number.NaN);
 
   if (!Number.isNaN(stress)) {
     if (stress >= 8) add("stress", 4, `Stress rated ${stress}/10`);

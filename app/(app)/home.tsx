@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, FlatList } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { ISSUES, Issue } from "../../src/data/issues";
+import { ISSUES, Issue } from "@/data/issues";
 
 export default function Home() {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);

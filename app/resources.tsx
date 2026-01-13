@@ -18,7 +18,7 @@ export default function Resources() {
       </Text>
 
       <Pressable
-        onPress={() => Linking.openURL(Platform.select({ ios: "tel:988", android: "tel:988", default: "tel:988" })!)}
+        onPress={() => Linking.openURL(Platform.select({ ios: "tel:988", android: "tel:988", default: "tel:988" }))}
         style={{ marginTop: 16, padding: 14, borderRadius: 18, backgroundColor: "white" }}
       >
         <Text style={{ fontSize: 16, fontWeight: "900" }}>Call 988 (US & Canada)</Text>

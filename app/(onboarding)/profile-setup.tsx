@@ -2,8 +2,8 @@ import React, { useMemo, useState } from "react";
 import { View, Text, Pressable, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import ProfileProgressRing from "../../src/components/ProfileProgressRing";
-import Chips from "../../src/components/Chips";
+import ProfileProgressRing from "@/components/ProfileProgressRing";
+import Chips from "@/components/Chips";
 
 type StepKey = "intro" | "name" | "intention" | "routine" | "finish";
 const STEPS: StepKey[] = ["intro", "name", "intention", "routine", "finish"];

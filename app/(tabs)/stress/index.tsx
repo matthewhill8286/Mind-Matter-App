@@ -3,6 +3,8 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import ScreenHeader from "@/components/ScreenHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors, UI } from "@/constants/theme";
 
 const STORAGE_KEY = "stress:kit:v1";
 
@@ -24,6 +26,8 @@ const DEFAULT_KIT: StressKit = {
 
 export default function StressHub() {
   const router = useRouter();
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
   const [kit, setKit] = useState<StressKit>(DEFAULT_KIT);
 
   useEffect(() => {
@@ -34,7 +38,7 @@ export default function StressHub() {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f6f4f2", padding: 24, paddingTop: 18 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, padding: UI.spacing.xl, paddingTop: 18 }}>
       <ScreenHeader
         title="Stress Management"
         subtitle="Quick tools for calming your body and clearing your mind."
@@ -57,9 +61,9 @@ export default function StressHub() {
           onPress={() => router.push("/(tabs)/stress/plan")}
         />
 
-        <View style={{ backgroundColor: "white", borderRadius: 18, padding: 14, marginTop: 6 }}>
-          <Text style={{ fontWeight: "900" }}>Your quick phrase</Text>
-          <Text style={{ opacity: 0.75, marginTop: 6 }}>{kit.quickPhrase || "—"}</Text>
+        <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14, marginTop: 6 }}>
+          <Text style={{ fontWeight: "900", color: colors.text }}>Your quick phrase</Text>
+          <Text style={{ color: colors.mutedText, marginTop: 6 }}>{kit.quickPhrase || "—"}</Text>
         </View>
       </ScrollView>
     </View>
@@ -67,18 +71,21 @@ export default function StressHub() {
 }
 
 function Card({ title, subtitle, onPress }: { title: string; subtitle: string; onPress: () => void }) {
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
+
   return (
     <Pressable
       onPress={onPress}
       style={{
-        backgroundColor: "white",
-        borderRadius: 18,
+        backgroundColor: colors.card,
+        borderRadius: UI.radius.lg,
         padding: 14,
       }}
     >
-      <Text style={{ fontSize: 16, fontWeight: "900" }}>{title}</Text>
-      <Text style={{ opacity: 0.7, marginTop: 4 }}>{subtitle}</Text>
-      <Text style={{ marginTop: 10, fontWeight: "900", opacity: 0.7 }}>Open →</Text>
+      <Text style={{ fontSize: 16, fontWeight: "900", color: colors.text }}>{title}</Text>
+      <Text style={{ color: colors.mutedText, marginTop: 4 }}>{subtitle}</Text>
+      <Text style={{ marginTop: 10, fontWeight: "900", color: colors.primary }}>Open →</Text>
     </Pressable>
   );
 }
