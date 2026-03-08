@@ -1,49 +1,37 @@
 import React from 'react';
 import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, hideAlert } from '@/store';
+import { useAlert, hideAlert } from '@/lib/state';
 
-export const AlertModal = () => {
-  const alert = useSelector((state: RootState) => state.app.alert);
-  const dispatch = useDispatch();
+export const AlertModal: React.FC = () => {
+  const alert = useAlert();
 
   if (!alert.visible) return null;
 
   return (
-    <Modal
-      transparent
-      visible={alert.visible}
-      animationType="fade"
-      onRequestClose={() => dispatch(hideAlert())}
-    >
-      <View style={styles.overlay}>
-        <View style={styles.container}>
-          <Text style={styles.title}>{alert.title}</Text>
-          <Text style={styles.message}>{alert.message}</Text>
-          <View style={styles.buttonContainer}>
-            {alert.actions.map((action, index) => (
-              <Pressable
-                key={action.text}
-                style={[
-                    styles.button,
-                    index > 0 && styles.buttonMargin,
-                    action.style === 'destructive' && styles.destructiveButton,
-                    action.style === 'cancel' && styles.cancelButton
-                ]}
-                onPress={() => {
-                  dispatch(hideAlert());
-                  action.onPress?.();
-                }}
-              >
-                <Text style={[
-                    styles.buttonText,
-                    action.style === 'destructive' && styles.destructiveButtonText,
-                    action.style === 'cancel' && styles.cancelButtonText
-                ]}>
-                    {action.text}
-                </Text>
-              </Pressable>
-            ))}
+    <Modal transparent visible={alert.visible} animationType="fade">
+      <View style={styles.backdrop}>
+        <View style={styles.card}>
+          {!!alert.title && <Text style={styles.title}>{alert.title}</Text>}
+          {!!alert.message && <Text style={styles.message}>{alert.message}</Text>}
+          <View style={styles.actions}>
+            {(alert.actions && alert.actions.length ? alert.actions : [{ text: 'OK' }]).map(
+              (a, i) => (
+                <Pressable
+                  key={i}
+                  onPress={() => {
+                    hideAlert();
+                    a.onPress?.();
+                  }}
+                  style={[styles.button, a.style === 'destructive' && styles.destructive]}
+                >
+                  <Text
+                    style={[styles.buttonText, a.style === 'destructive' && styles.destructiveText]}
+                  >
+                    {a.text}
+                  </Text>
+                </Pressable>
+              ),
+            )}
           </View>
         </View>
       </View>
@@ -52,63 +40,49 @@ export const AlertModal = () => {
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
-  container: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 24,
+  card: {
     width: '100%',
-    maxWidth: 400,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '900',
     marginBottom: 8,
-    textAlign: 'center',
+    color: '#333',
   },
   message: {
-    fontSize: 16,
-    opacity: 0.7,
-    marginBottom: 24,
-    textAlign: 'center',
-    lineHeight: 22,
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 16,
   },
-  buttonContainer: {
+  actions: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     gap: 12,
   },
   button: {
-    flex: 1,
-    backgroundColor: '#a07b55',
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  buttonMargin: {
-    // marginLeft: 12,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: '900',
-    fontSize: 16,
-  },
-  destructiveButton: {
-    backgroundColor: '#ff4444',
-  },
-  destructiveButtonText: {
-    color: 'white',
-  },
-  cancelButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
     backgroundColor: '#eee',
   },
-  cancelButtonText: {
+  buttonText: {
+    fontWeight: '800',
     color: '#333',
+  },
+  destructive: {
+    backgroundColor: '#ffe8e8',
+  },
+  destructiveText: {
+    color: '#cc0000',
   },
 });

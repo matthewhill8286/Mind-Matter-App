@@ -1,7 +1,7 @@
-import React from "react";
-import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors, UI } from "@/constants/theme";
+import React from 'react';
+import { View, Text, Pressable, StyleSheet, Animated } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors, UI } from '@/constants/theme';
 
 type ChipsProps = {
   options: string[];
@@ -10,7 +10,12 @@ type ChipsProps = {
   multiple?: boolean;
 };
 
-export default function Chips({ options, value, onChange, multiple = false }: ChipsProps) {
+export default function Chips({
+  options,
+  value,
+  onChange,
+  multiple = false,
+}: Readonly<ChipsProps>) {
   const selected = Array.isArray(value) ? value : value ? [value] : [];
 
   function toggle(option: string) {
@@ -26,14 +31,20 @@ export default function Chips({ options, value, onChange, multiple = false }: Ch
     <View style={styles.container}>
       {options.map((option) => {
         const isActive = selected.includes(option);
-        return <Chip key={option} label={option} active={isActive} onPress={() => toggle(option)} />;
+        return (
+          <Chip key={option} label={option} active={isActive} onPress={() => toggle(option)} />
+        );
       })}
     </View>
   );
 }
 
-function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  const theme = useColorScheme() ?? "light";
+function Chip({
+  label,
+  active,
+  onPress,
+}: Readonly<{ label: string; active: boolean; onPress: () => void }>) {
+  const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
   const scale = React.useRef(new Animated.Value(1)).current;
 
@@ -53,18 +64,12 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
         style={[
           styles.chip,
           { backgroundColor: colors.inputBg },
-          active && { backgroundColor: colors.primary }
+          active && { backgroundColor: colors.primary },
         ]}
         accessibilityRole="button"
         accessibilityState={{ selected: active }}
       >
-        <Text
-          style={[
-            styles.text,
-            { color: colors.text },
-            active && { color: colors.onPrimary }
-          ]}
-        >
+        <Text style={[styles.text, { color: colors.text }, active && { color: colors.onPrimary }]}>
           {label}
         </Text>
       </Pressable>
@@ -73,7 +78,7 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
 }
 
 const styles = StyleSheet.create({
-  container: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 16 },
+  container: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 16 },
   chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: UI.radius.pill },
-  text: { fontSize: 15, fontWeight: "700" },
+  text: { fontSize: 15, fontWeight: '700' },
 });
