@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows automatically instantiating createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.1"
@@ -217,7 +217,7 @@ export type Database = {
       }
       profiles: {
         Row: {
-          intention: string | null | undefined
+          intention: string | null
           name: string | null
           routine: string | null
           selectedIssues: Json | null

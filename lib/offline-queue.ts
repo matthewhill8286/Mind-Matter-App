@@ -234,12 +234,10 @@ export async function getQueueSize(): Promise<number> {
  * Setup network listener to auto-process queue when connection restored
  */
 export function setupNetworkListener(): () => void {
-  const unsubscribe = NetInfo.addEventListener((state) => {
+  return NetInfo.addEventListener((state) => {
     if (state.isConnected && state.isInternetReachable) {
       console.log('[Offline Queue] Network connection restored, processing queue...');
       processQueue();
     }
   });
-
-  return unsubscribe;
 }

@@ -19,7 +19,7 @@ const MOODS: MoodCheckIn['mood'][] = ['Great', 'Good', 'Okay', 'Low', 'Bad'];
 const ENERGY = ['1', '2', '3', '4', '5'];
 const STRESS = Array.from({ length: 11 }, (_, i) => String(i));
 
-function moodToScore(m: string) {
+function moodToScore(m: string | null) {
   if (m === 'Great') return 5;
   if (m === 'Good') return 4;
   if (m === 'Okay') return 3;
@@ -81,8 +81,8 @@ export default function Mood() {
     if (items.length < 3) return null;
     const last = items.slice(0, 14);
     const avgMood = last.reduce((a, x) => a + moodToScore(x.mood), 0) / last.length;
-    const avgStress = last.reduce((a, x) => a + x.stress, 0) / last.length;
-    const avgEnergy = last.reduce((a, x) => a + x.energy, 0) / last.length;
+    const avgStress = last.reduce((a, x) => a + (x?.stress ?? 0), 0) / last.length;
+    const avgEnergy = last.reduce((a, x) => a + (x.energy ?? 0), 0) / last.length;
     return { avgMood, avgStress, avgEnergy, n: last.length };
   }, [items]);
 
@@ -103,12 +103,13 @@ export default function Mood() {
       return;
     }
     await withLoading('save-mood', async () => {
-      const entry: Omit<MoodCheckIn, 'id' | 'created_at'> = {
+      const entry: Omit<MoodCheckIn, 'id' | 'created_at' | 'updated_at' | 'user_id'> = {
+        label: mood || 'Untitled',
         mood,
         energy,
         stress,
-        note: note.trim() || undefined,
-        tags: tags.length > 0 ? tags : undefined,
+        note: note.trim() || null,
+        tags: tags.length > 0 ? tags : [],
       };
       await addMoodCheckIn(entry);
       setNote('');
@@ -245,8 +246,8 @@ export default function Mood() {
                 {t('mood.mood')}
               </Text>
               <Chips
-                options={MOODS.map((m) => t(`mood.${m.toLowerCase()}`))}
-                value={mood}
+                options={MOODS.map((m) => t(`mood.${m?.toLowerCase()}`))}
+                value={mood ?? ''}
                 onChange={(v) => setMood(v as MoodCheckIn['mood'])}
               />
 

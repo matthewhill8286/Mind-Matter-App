@@ -31,7 +31,18 @@ export default function StressPlan() {
   }, [fetchStressKit]);
 
   useEffect(() => {
-    if (stressKit) setDraft(stressKit);
+    if (stressKit) {
+      const normalizeStrings = (arr: unknown): string[] =>
+        (Array.isArray(arr) ? arr : []).map((item) =>
+          typeof item === 'string' ? item : (item as any)?.name ?? String(item),
+        );
+      setDraft({
+        ...stressKit,
+        triggers: normalizeStrings(stressKit.triggers),
+        helpfulActions: normalizeStrings(stressKit.helpfulActions),
+        people: normalizeStrings(stressKit.people),
+      } as StressKit);
+    }
   }, [stressKit]);
 
   const addItem = (field: keyof StressKit, value: string) => {

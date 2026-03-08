@@ -15,7 +15,7 @@ interface MoodActions {
   initialize: () => void;
   cleanup: () => void;
   fetchMoodCheckIns: () => Promise<void>;
-  addMoodCheckIn: (input: MoodCheckInInsert) => Promise<MoodCheckIn>;
+  addMoodCheckIn: (input: Omit<MoodCheckInInsert, 'user_id'>) => Promise<MoodCheckIn>;
   deleteMoodCheckIn: (id: string) => Promise<void>;
   clearMood: () => void;
 }

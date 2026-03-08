@@ -9,6 +9,8 @@ import { BREATHING_EXERCISES } from '@/data/breathingExercises';
 
 type Phase = 'inhale' | 'hold' | 'exhale' | 'hold-after-exhale';
 
+const RING_COLOR = '#4ade80';
+
 export default function BreathingExerciseDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const exercise = BREATHING_EXERCISES.find((e) => e.id === id);
@@ -44,7 +46,6 @@ export default function BreathingExerciseDetail() {
         easing: Easing.inOut(Easing.quad),
       }).start();
     } else if (phase === 'hold') {
-      // Keep at 1.05
       Animated.timing(scale, {
         toValue: 1.05,
         duration: plan.secs * 1000,
@@ -59,7 +60,6 @@ export default function BreathingExerciseDetail() {
         easing: Easing.inOut(Easing.quad),
       }).start();
     } else {
-      // hold-after-exhale: Keep at 0.75
       Animated.timing(scale, {
         toValue: 0.75,
         duration: plan.secs * 1000,
@@ -92,7 +92,12 @@ export default function BreathingExerciseDetail() {
         setCycles((c) => {
           const newCycles = c + 1;
           if (newCycles === 4) {
-            useStressHistoryStore.getState().addStressCompletion(exercise.id, exercise.title);
+            void useStressHistoryStore.getState().addStressCompletion({
+              exerciseId: exercise.id,
+              title: exercise.title,
+              type: 'breathing',
+              date: new Date().toISOString(),
+            });
           }
           return newCycles;
         });
@@ -137,32 +142,52 @@ export default function BreathingExerciseDetail() {
           <Text style={{ color: colors.mutedText, marginTop: 6 }}>{exercise.description}</Text>
         </View>
 
-        <View style={{ alignItems: 'center', marginTop: 22 }}>
+        <View
+          style={{ alignItems: 'center', justifyContent: 'center', marginTop: 22, height: 340 }}
+        >
+          {/* All rings + core animate together */}
           <Animated.View
             style={{
-              width: 220,
-              height: 220,
-              borderRadius: 110,
-              backgroundColor: theme === 'light' ? '#efe6dd' : colors.surface,
               alignItems: 'center',
               justifyContent: 'center',
               transform: [{ scale }],
             }}
           >
+            {/* Outermost → innermost: lighter → darker green fills */}
+            {[
+              { size: 320, color: '#bbf7d0' }, // lightest
+              { size: 270, color: '#86efac' },
+              { size: 220, color: '#4ade80' },
+              { size: 170, color: '#22c55e' }, // darkest outer ring
+            ].map(({ size, color }, i) => (
+              <View
+                key={i}
+                style={{
+                  position: 'absolute',
+                  width: size,
+                  height: size,
+                  borderRadius: size / 2,
+                  backgroundColor: color,
+                  opacity: 0.25,
+                }}
+              />
+            ))}
+
+            {/* Core pulse circle */}
             <View
               style={{
-                width: 160,
-                height: 160,
-                borderRadius: 80,
-                backgroundColor: colors.primary,
-                opacity: 0.25,
+                width: 120,
+                height: 120,
+                borderRadius: 60,
+                backgroundColor: RING_COLOR,
+                opacity: 0.9,
               }}
             />
           </Animated.View>
+        </View>
 
-          <Text style={{ marginTop: 18, fontSize: 22, fontWeight: '900', color: colors.text }}>
-            {plan.label}
-          </Text>
+        <View style={{ alignItems: 'center', marginTop: 22 }}>
+          <Text style={{ fontSize: 22, fontWeight: '900', color: colors.text }}>{plan.label}</Text>
           <Text style={{ color: colors.mutedText, marginTop: 6 }}>
             {running ? `${secondsLeft}s` : 'Ready'}
           </Text>

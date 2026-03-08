@@ -3,10 +3,12 @@ import { View, Text, Pressable, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useProfileStore } from '@/store/useProfileStore';
 
 export default function SignUp() {
   const { t } = useTranslation();
   const { signUpWithEmail, submitting, error: authError, clearError } = useAuthStore();
+  const { fetchProfile } = useProfileStore();
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
@@ -26,7 +28,15 @@ export default function SignUp() {
         setLocalError(t('auth.checkEmailForConfirmation'));
         return;
       }
-      router.replace('/(auth)/trial-upgrade');
+
+      await fetchProfile();
+      const updatedProfile = useProfileStore.getState().profile;
+
+      if (updatedProfile?.subscription_type) {
+        router.replace('/(tabs)/home');
+      } else {
+        router.replace('/(auth)/trial-upgrade');
+      }
     }
   }
 
@@ -34,7 +44,11 @@ export default function SignUp() {
     <View style={{ flex: 1, backgroundColor: '#6f6660', padding: 24, justifyContent: 'center' }}>
       <View style={{ backgroundColor: 'white', borderRadius: 28, padding: 26 }}>
         <Text style={{ fontSize: 26, fontWeight: '900' }}>{t('auth.signUp')}</Text>
-        {(authError || localError) && <Text style={{ color: 'red', marginTop: 12, fontWeight: '600' }}>{authError || localError}</Text>}
+        {(authError || localError) && (
+          <Text style={{ color: 'red', marginTop: 12, fontWeight: '600' }}>
+            {authError || localError}
+          </Text>
+        )}
         <Text style={{ marginTop: 18, fontWeight: '900' }}>{t('auth.email')}</Text>
         <TextInput
           value={email}

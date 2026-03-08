@@ -3,10 +3,12 @@ import { View, Text, Pressable, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useProfileStore } from '@/store/useProfileStore';
 
 export default function SignIn() {
   const { t } = useTranslation();
   const { signInWithEmail, submitting, error: authError, clearError } = useAuthStore();
+  const { fetchProfile, profile } = useProfileStore();
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
 
@@ -17,7 +19,14 @@ export default function SignIn() {
     clearError();
     const error = await signInWithEmail(email, pass);
     if (!error) {
-      router.replace('/(auth)/trial-upgrade');
+      await fetchProfile();
+      const updatedProfile = useProfileStore.getState().profile;
+
+      if (updatedProfile?.subscription_type) {
+        router.replace('/(tabs)/home');
+      } else {
+        router.replace('/(auth)/trial-upgrade');
+      }
     }
   }
 
@@ -25,7 +34,9 @@ export default function SignIn() {
     <View style={{ flex: 1, backgroundColor: '#6f6660', padding: 24, justifyContent: 'center' }}>
       <View style={{ backgroundColor: 'white', borderRadius: 28, padding: 26 }}>
         <Text style={{ fontSize: 26, fontWeight: '900' }}>{t('auth.signIn')}</Text>
-        {authError && <Text style={{ color: 'red', marginTop: 12, fontWeight: '600' }}>{authError}</Text>}
+        {authError && (
+          <Text style={{ color: 'red', marginTop: 12, fontWeight: '600' }}>{authError}</Text>
+        )}
 
         <Text style={{ marginTop: 18, fontWeight: '900' }}>{t('auth.email')}</Text>
         <TextInput
@@ -50,7 +61,9 @@ export default function SignIn() {
           style={[primaryBtn, submitting && { opacity: 0.7 }]}
           disabled={submitting}
         >
-          <Text style={primaryBtnText}>{submitting ? t('auth.signingIn') : t('auth.continue')}</Text>
+          <Text style={primaryBtnText}>
+            {submitting ? t('auth.signingIn') : t('auth.continue')}
+          </Text>
         </Pressable>
 
         <Pressable onPress={() => router.push('/(auth)/sign-up')} style={{ marginTop: 12 }}>

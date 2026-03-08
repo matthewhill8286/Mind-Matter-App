@@ -6,19 +6,23 @@ import { showAlert, withLoading } from '@/lib/state';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { useProfileStore } from '@/store/useProfileStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function TrialUpgrade() {
   const { t } = useTranslation();
   const [isNewUser, setIsNewUser] = useState(true);
   const [loading, setLoading] = useState(false);
   const { assessment, fetchAssessment, updateProfile } = useProfileStore();
+  const { user } = useAuthStore();
+
+  console.log('user', user);
 
   useEffect(() => {
     (async () => {
       if (!assessment) {
         await fetchAssessment();
-      }
-      if (useProfileStore.getState().assessment) {
+        router.replace('/(tabs)/home');
+      } else {
         setIsNewUser(false);
       }
     })();

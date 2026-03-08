@@ -63,7 +63,7 @@ export default function MoodDetailScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <View style={styles.moodHeader}>
-            <MaterialIcons name={getMoodIcon(entry.mood)} size={48} color={colors.primary} />
+            <MaterialIcons name={getMoodIcon(entry.mood ?? '')} size={48} color={colors.primary} />
             <Text style={[styles.moodText, { color: colors.text }]}>{entry.mood}</Text>
             <Text style={[styles.timeText, { color: colors.mutedText }]}>
               {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -83,7 +83,7 @@ export default function MoodDetailScreen() {
             </View>
           </View>
 
-          {entry.tags && entry.tags.length > 0 && (
+          {entry.tags && (entry.tags as string[]).length > 0 && (
             <>
               <View style={styles.divider} />
               <View style={styles.tagsSection}>
@@ -91,7 +91,7 @@ export default function MoodDetailScreen() {
                   Tags
                 </Text>
                 <View style={styles.tagsContainer}>
-                  {entry.tags.map((tag, idx) => (
+                  {(entry.tags as string[]).map((tag, idx) => (
                     <View key={idx} style={[styles.tag, { backgroundColor: colors.background }]}>
                       <Text style={[styles.tagText, { color: colors.primary }]}>#{tag}</Text>
                     </View>

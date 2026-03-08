@@ -1,5 +1,14 @@
 import '@testing-library/jest-native/extend-expect';
 
+jest.mock('./hooks/useSubscription', () => ({
+  useSubscription: jest.fn(() => ({
+    subscription: null,
+    isExpired: false,
+    isLifetime: false,
+    hasFullAccess: true,
+  })),
+}));
+
 jest.mock('expo-router', () => ({
   router: {
     push: jest.fn(),

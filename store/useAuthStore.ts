@@ -65,7 +65,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       return error;
     }
     set({ submitting: false });
-    router.replace('/(tabs)/home');
     return null;
   },
 

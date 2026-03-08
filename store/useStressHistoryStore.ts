@@ -15,7 +15,7 @@ interface StressHistoryActions {
   initialize: () => void;
   cleanup: () => void;
   fetchStressHistory: () => Promise<void>;
-  addStressCompletion: (input: StressCompletionInsert) => Promise<StressCompletion>;
+  addStressCompletion: (input: Omit<StressCompletionInsert, 'user_id'>) => Promise<StressCompletion>;
   clearStressHistory: () => void;
 }
 
@@ -52,7 +52,7 @@ const createStressHistorySlice: SliceCreator<
           } else if (eventType === 'UPDATE') {
             set((state) => ({
               stressHistory: state.stressHistory.map((item) =>
-                item.id === newRecord.id ? (newRecord as StressCompletion) : item
+                item.id === newRecord.id ? (newRecord as StressCompletion) : item,
               ),
             }));
           } else if (eventType === 'DELETE') {
@@ -60,7 +60,7 @@ const createStressHistorySlice: SliceCreator<
               stressHistory: state.stressHistory.filter((item) => item.id !== oldRecord.id),
             }));
           }
-        }
+        },
       )
       .subscribe();
 
@@ -81,6 +81,7 @@ const createStressHistorySlice: SliceCreator<
     set({ error: null });
     try {
       const userId = useAuthStore.getState().user?.id;
+      if (!userId) throw new Error('No user session');
       const { data, error } = await supabase
         .from('stress_histories')
         .select('*')
@@ -102,12 +103,13 @@ const createStressHistorySlice: SliceCreator<
 
   addStressCompletion: async (input) => {
     const userId = useAuthStore.getState().user?.id;
+    if (!userId) throw new Error('No user session');
 
     const tempId = `temp-${Date.now()}`;
     const optimisticEntry: StressCompletion = {
       id: tempId,
-      user_id: userId,
       ...input,
+      user_id: userId,
     } as StressCompletion;
 
     set((state) => ({ stressHistory: [optimisticEntry, ...state.stressHistory] }));
@@ -123,7 +125,7 @@ const createStressHistorySlice: SliceCreator<
 
       set((state) => ({
         stressHistory: state.stressHistory.map((item) =>
-          item.id === tempId ? (result as StressCompletion) : item
+          item.id === tempId ? (result as StressCompletion) : item,
         ),
       }));
 
