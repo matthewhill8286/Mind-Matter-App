@@ -1,0 +1,17 @@
+export const AFFIRMATIONS = [
+  'I am worthy of peace and happiness.',
+  'I choose to focus on what I can control.',
+  'My feelings are valid, and I am learning to navigate them.',
+  'I am doing my best, and that is enough.',
+  'I give myself permission to rest and recharge.',
+  'I am resilient and can handle whatever today brings.',
+  'I am grateful for the small moments of joy.',
+  'I speak to myself with kindness and compassion.',
+  'Every day is a fresh start.',
+  'I am growing and evolving every single day.',
+  'I trust my intuition and inner wisdom.',
+  'I am surrounded by support and love.',
+  'I am capable of achieving my goals.',
+  'I release what no longer serves me.',
+  'I am proud of how far I have come.',
+];

@@ -1,129 +1,251 @@
-import React, { useEffect, useMemo } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
-import ScreenHeader from "@/components/ScreenHeader";
-import { router } from "expo-router";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch, fetchAll } from "@/store";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors, UI } from "@/constants/theme";
+import React, { useMemo, useEffect, useState } from 'react';
+import { View, Text, Pressable, ScrollView, Platform } from 'react-native';
+import ScreenHeader from '@/components/ScreenHeader';
+import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { calculateWellnessScore } from '@/lib/wellness';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Colors, UI } from '@/constants/theme';
+import { AFFIRMATIONS } from '@/constants/affirmations';
+import { useMoodStore } from '@/store/useMoodStore';
+import { useJournalStore } from '@/store/useJournalStore';
+import { useSleepStore } from '@/store/useSleepStore';
+import { useMindfulnessStore } from '@/store/useMindfulnessStore';
+import { useStressHistoryStore } from '@/store/useStressHistoryStore';
+import { useProfileStore } from '@/store/useProfileStore';
 
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n));
-}
-
-function moodToScore(m: "Great" | "Good" | "Okay" | "Low" | "Bad") {
-  if (m === "Great") return 5;
-  if (m === "Good") return 4;
-  if (m === "Okay") return 3;
-  if (m === "Low") return 2;
-  return 1;
-}
+import ScoreCard from '@/components/ScoreCard';
+import { SkeletonRect } from '@/components/Skeleton';
+import { MiniStat } from '@/components/MiniStat';
+import { HorizontalActionList } from '@/components/HorizontalActionList';
 
 export default function Home() {
-  const dispatch = useDispatch<AppDispatch>();
-  const theme = useColorScheme() ?? "light";
+  const { t } = useTranslation();
+  const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
-  const { moodCheckIns, journalEntries, assessment } = useSelector((s: RootState) => s.app);
+  const { isExpired } = useSubscription();
+
+  const [loading, setLoading] = useState(true);
+  const { assessment, fetchAssessment } = useProfileStore();
+  const { moodCheckIns, fetchMoodCheckIns } = useMoodStore();
+  const { journalEntries, fetchJournalEntries } = useJournalStore();
+  const { sleepEntries, fetchSleepEntries } = useSleepStore();
+  const { mindfulnessHistory, fetchMindfulnessHistory } = useMindfulnessStore();
+  const { stressHistory, fetchStressHistory } = useStressHistoryStore();
 
   useEffect(() => {
-    dispatch(fetchAll());
+    (async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchMoodCheckIns(),
+        fetchJournalEntries(),
+        fetchAssessment(),
+        fetchStressHistory(),
+        fetchMindfulnessHistory(),
+        fetchSleepEntries(),
+      ]);
+      setLoading(false);
+    })();
+  }, [
+    fetchAssessment,
+    fetchJournalEntries,
+    fetchMindfulnessHistory,
+    fetchMoodCheckIns,
+    fetchSleepEntries,
+    fetchStressHistory,
+  ]);
+
+  const allData = useMemo(
+    () => ({
+      moodCheckIns,
+      journalEntries,
+      assessment,
+      stressHistory,
+      mindfulnessHistory,
+      sleepEntries,
+    }),
+    [moodCheckIns, journalEntries, assessment, stressHistory, mindfulnessHistory, sleepEntries],
+  );
+
+  const wellness = useMemo(() => calculateWellnessScore(allData), [allData]);
+
+  const moodCount = moodCheckIns?.length || 0;
+  const journalCount = journalEntries?.length || 0;
+
+  const affirmation = useMemo(() => {
+    const today = new Date().toDateString();
+    // Simple deterministic hash based on date string
+    let hash = 0;
+    for (let i = 0; i < today.length; i++) {
+      hash = today.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % AFFIRMATIONS.length;
+    return AFFIRMATIONS[index];
   }, []);
 
-  const { score, scoreHint } = useMemo(() => {
-    // Very simple heuristic score (0-100) using last mood + stress
-    if (moodCheckIns.length) {
-      const last = moodCheckIns[0];
-      const moodScore = (moodToScore(last.mood) / 5) * 70; // up to 70
-      const stressPenalty = (last.stress / 10) * 25; // up to -25
-      const energyBonus = ((last.energy - 1) / 4) * 15; // up to +15
-      const s = clamp(Math.round(moodScore - stressPenalty + energyBonus + 10), 0, 100);
-      return { score: s, scoreHint: "Updated from your latest mood check-in." };
-    } else if (assessment) {
-      return { score: 65, scoreHint: "Set from your assessment. Add mood check-ins to refine it." };
-    } else {
-      return { score: 60, scoreHint: "Complete your assessment and add check-ins to refine this." };
-    }
-  }, [moodCheckIns, assessment]);
-
-  const moodCount = moodCheckIns.length;
-  const journalCount = journalEntries.length;
-
-  const quickCards = useMemo(
-    () => [
-      { title: "Stress toolkit", subtitle: "Breathing, grounding, and your Stress Plan.", onPress: () => router.push("/(tabs)/stress") },
-      { title: "Mood check-in", subtitle: "Log mood, energy, and stress in 30 seconds.", onPress: () => router.push("/(tabs)/mood") },
-      { title: "Journal", subtitle: "Write a quick entry or use a prompt.", onPress: () => router.push("/(tabs)/journal") },
-      { title: "Chat", subtitle: "Talk to the AI about a specific topic.", onPress: () => router.push("/(tabs)/chat") },
-    ],
-    []
-  );
-
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background, padding: UI.spacing.xl, paddingTop: 18 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 26 }} showsVerticalScrollIndicator={false}>
-        <ScreenHeader title="Home" subtitle="Your wellbeing snapshot and quick actions." />
-
-        <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.xl, padding: 16, marginTop: 14 }}>
-          <Text style={{ fontWeight: "900", color: colors.mutedText }}>Mental Health Score</Text>
-          <Text style={{ fontSize: 44, fontWeight: "900", marginTop: 6, color: colors.text }}>{score}</Text>
-          <Text style={{ color: colors.mutedText, marginTop: 6 }}>{scoreHint}</Text>
-
-          <View style={{ flexDirection: "row", gap: 10, marginTop: 14 }}>
-            <MiniStat label="Mood check-ins" value={String(moodCount)} />
-            <MiniStat label="Journal entries" value={String(journalCount)} />
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+        padding: UI.spacing.xl,
+        paddingTop: Platform.OS === 'ios' ? 18 : 8,
+      }}
+    >
+      <ScreenHeader title={t('tabs.home')} subtitle={t('home.welcomeSubtitle')} />
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 26, marginTop: 14 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {loading ? (
+          <View style={{ gap: 14 }}>
+            <SkeletonRect height={100} borderRadius={UI.radius.xl} />
+            <SkeletonRect height={380} borderRadius={UI.radius.xl} />
+            <SkeletonRect height={30} width={120} style={{ marginTop: 16 }} />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <SkeletonRect height={120} borderRadius={UI.radius.xl} style={{ flex: 1 }} />
+              <SkeletonRect height={120} borderRadius={UI.radius.xl} style={{ flex: 1 }} />
+            </View>
           </View>
-
-          {assessment ? null : (
+        ) : (
+          <>
+            {isExpired && (
               <Pressable
-                  onPress={() => router.push("/(onboarding)/assessment")}
-                  style={{
-                    marginTop: 14,
-                    backgroundColor: colors.primary,
-                    padding: 14,
-                    borderRadius: UI.radius.lg,
-                    alignItems: "center"
-                  }}
+                onPress={() => router.push('/(auth)/trial-upgrade')}
+                style={{
+                  backgroundColor: '#a07b55',
+                  borderRadius: UI.radius.lg,
+                  padding: 16,
+                  marginTop: 14,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
               >
-                <Text style={{color: colors.onPrimary, fontWeight: "900"}}>Complete assessment</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: 'white', fontWeight: '900', fontSize: 16 }}>
+                    {t('common.trialExpired')}
+                  </Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>
+                    {t('common.upgradeToLifetime')}
+                  </Text>
+                </View>
+                <Text style={{ color: 'white', fontSize: 24, fontWeight: '900', marginLeft: 10 }}>
+                  →
+                </Text>
               </Pressable>
-          )}
-        </View>
+            )}
 
-        <Text style={{ marginTop: 16, fontWeight: "900", fontSize: 16, color: colors.text }}>Quick actions</Text>
+            <View
+              style={{
+                backgroundColor: '#828a6a',
+                borderRadius: UI.radius.xl,
+                padding: 20,
+                marginTop: 14,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 10,
+                elevation: 4,
+              }}
+            >
+              <Text
+                style={{
+                  color: 'rgba(255,255,255,0.8)',
+                  fontWeight: '800',
+                  fontSize: 12,
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                }}
+              >
+                {t('common.dailyAffirmation')}
+              </Text>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 20,
+                  fontWeight: '700',
+                  marginTop: 8,
+                  fontStyle: 'italic',
+                  lineHeight: 28,
+                }}
+              >
+                {affirmation}
+              </Text>
+            </View>
 
-        <View style={{ marginTop: 10, gap: 12 }}>
-          {quickCards.map((c) => (
-            <Pressable key={c.title} onPress={c.onPress} style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14 }}>
-              <Text style={{ fontSize: 16, fontWeight: "900", color: colors.text }}>{c.title}</Text>
-              <Text style={{ color: colors.mutedText, marginTop: 4 }}>{c.subtitle}</Text>
-              <Text style={{ marginTop: 10, fontWeight: "900", color: colors.primary }}>Open →</Text>
-            </Pressable>
-          ))}
-        </View>
+            <View
+              style={{
+                backgroundColor: colors.card,
+                borderRadius: UI.radius.xl,
+                padding: 16,
+                marginTop: 14,
+              }}
+            >
+              <Text style={{ fontWeight: '900', color: colors.mutedText, marginBottom: 4 }}>
+                {t('common.wellnessSnapshot')}
+              </Text>
 
-        <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14, marginTop: 16 }}>
-          <Text style={{ fontWeight: "900", color: colors.text }}>Need a quick reset?</Text>
-          <Text style={{ color: colors.mutedText, marginTop: 6 }}>Tap to start guided breathing or grounding exercises right away.</Text>
-          <Pressable
-            onPress={() => router.push("/(tabs)/stress")}
-            style={{ marginTop: 12, backgroundColor: colors.divider, padding: 14, borderRadius: UI.radius.lg, alignItems: "center" }}
-          >
-            <Text style={{ fontWeight: "900", color: colors.text }}>Open Stress toolkit</Text>
-          </Pressable>
-        </View>
+              <ScoreCard
+                score={wellness.score}
+                title={t('common.mindMateWellnessScore')}
+                subtitle={t('common.wellbeingBaseline')}
+                bg="#6bbf8e"
+              />
+              <ScoreCard
+                score={100 - wellness.breakdown.stress}
+                title={t('common.stressLoad')}
+                subtitle={t('common.keepStressManageable')}
+                bg="#f2a65a"
+              />
+              <ScoreCard
+                score={100 - wellness.breakdown.sleep}
+                title={t('common.sleepQuality')}
+                subtitle={t('common.prioritizeRest')}
+                bg="#9b8df1"
+              />
+
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+                <MiniStat label={t('common.moodCheckIns')} value={String(moodCount)} />
+                <MiniStat label={t('common.journalEntries')} value={String(journalCount)} />
+              </View>
+            </View>
+
+            <HorizontalActionList title={t('common.quickActions')} />
+
+            <View
+              style={{
+                backgroundColor: colors.card,
+                borderRadius: UI.radius.lg,
+                padding: 14,
+                marginTop: 24,
+              }}
+            >
+              <Text style={{ fontWeight: '900', color: colors.text }}>
+                {t('common.needQuickReset')}
+              </Text>
+              <Text style={{ color: colors.mutedText, marginTop: 6 }}>
+                {t('common.tapForBreathing')}
+              </Text>
+              <Pressable
+                onPress={() => router.push('/(tabs)/stress')}
+                style={{
+                  marginTop: 12,
+                  backgroundColor: colors.divider,
+                  padding: 14,
+                  borderRadius: UI.radius.lg,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ fontWeight: '900', color: colors.text }}>
+                  {t('common.openStressToolkit')}
+                </Text>
+              </Pressable>
+            </View>
+          </>
+        )}
       </ScrollView>
-    </View>
-  );
-}
-
-function MiniStat({ label, value }: Readonly<{ label: string; value: string }>) {
-  const theme = useColorScheme() ?? "light";
-  const colors = Colors[theme];
-
-  return (
-    <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: UI.radius.md, padding: 12 }}>
-      <Text style={{ color: colors.mutedText, fontWeight: "800" }}>{label}</Text>
-      <Text style={{ fontSize: 18, fontWeight: "900", marginTop: 6, color: colors.text }}>{value}</Text>
     </View>
   );
 }

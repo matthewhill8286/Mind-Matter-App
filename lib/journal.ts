@@ -1,41 +1,39 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { JournalEntry } from './types';
 
-export type JournalEntry = {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  title: string;
-  body: string;
-  mood?: string | null;
-  tags?: string[];
-  promptId?: string | null;
-};
-
-const KEY = "journal:entries:v1";
-
-export async function listEntries(): Promise<JournalEntry[]> {
-  const raw = await AsyncStorage.getItem(KEY);
-  const entries = raw ? (JSON.parse(raw) as JournalEntry[]) : [];
-  return entries.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+/**
+ * @deprecated Use useActivityStore().journalEntries or useActivityStore().fetchJournalEntries()
+ */
+export async function listJournalEntries(): Promise<JournalEntry[]> {
+  return [];
 }
 
-export async function getEntry(id: string): Promise<JournalEntry | null> {
-  const raw = await AsyncStorage.getItem(KEY);
-  const entries = raw ? (JSON.parse(raw) as JournalEntry[]) : [];
-  return entries.find((e) => e.id === id) ?? null;
+/**
+ * @deprecated Use useActivityStore().journalEntries.find()
+ */
+export async function getJournalEntry(id: string): Promise<JournalEntry | null> {
+  return null;
 }
 
-export async function upsertEntry(entry: JournalEntry): Promise<void> {
-  const raw = await AsyncStorage.getItem(KEY);
-  const all = raw ? (JSON.parse(raw) as JournalEntry[]) : [];
-  const idx = all.findIndex((e) => e.id === entry.id);
-  if (idx >= 0) all[idx] = entry;
-  else all.push(entry);
-  await AsyncStorage.setItem(KEY, JSON.stringify(all));
+/**
+ * @deprecated Use useActivityStore().createJournalEntry()
+ */
+export async function createJournalEntry(
+  input: Omit<JournalEntry, 'id' | 'created_at' | 'updated_at'> &
+    Partial<Pick<JournalEntry, 'id' | 'created_at' | 'updated_at'>>,
+): Promise<JournalEntry> {
+  throw new Error('Deprecated. Use useActivityStore().createJournalEntry() instead.');
 }
 
-export async function deleteEntry(id: string): Promise<void> {
-  const raw = await AsyncStorage.getItem(KEY);
-  const all = raw ? (JSON.parse(raw) as JournalEntry[]) : [];
-  await AsyncStorage.setItem(KEY, JSON.stringify(all.filter((e) => e.id !== id)));
+/**
+ * @deprecated Use useActivityStore().upsertJournalEntry()
+ */
+export async function upsertJournalEntry(input: JournalEntry): Promise<JournalEntry> {
+  throw new Error('Deprecated. Use useActivityStore().upsertJournalEntry() instead.');
+}
+
+/**
+ * @deprecated Use useActivityStore().deleteJournalEntry()
+ */
+export async function deleteJournalEntry(id: string): Promise<boolean> {
+  throw new Error('Deprecated. Use useActivityStore().deleteJournalEntry() instead.');
 }

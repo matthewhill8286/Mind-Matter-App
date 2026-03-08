@@ -1,23 +1,29 @@
-import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, Alert } from "react-native";
-import ScreenHeader from "@/components/ScreenHeader";
-import { useRouter } from "expo-router";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors, UI } from "@/constants/theme";
+import React, { useState } from 'react';
+import { useStressHistoryStore } from '@/store/useStressHistoryStore';
+import { Alert, Platform, View, Text, Pressable, ScrollView, TextInput } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import ScreenHeader from '@/components/ScreenHeader';
+import { useRouter } from 'expo-router';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors, UI } from '@/constants/theme';
 
 export default function Grounding() {
+  const { t } = useTranslation();
   const router = useRouter();
-  const theme = useColorScheme() ?? "light";
+  const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
 
-  const [sights, setSights] = useState<string[]>(["", "", "", "", ""]);
-  const [touch, setTouch] = useState<string[]>(["", "", "", ""]);
-  const [sounds, setSounds] = useState<string[]>(["", "", ""]);
-  const [smells, setSmells] = useState<string[]>(["", ""]);
-  const [taste, setTaste] = useState<string>("");
+  const [sights, setSights] = useState<string[]>(['', '', '', '', '']);
+  const [touch, setTouch] = useState<string[]>(['', '', '', '']);
+  const [sounds, setSounds] = useState<string[]>(['', '', '']);
+  const [smells, setSmells] = useState<string[]>(['', '']);
+  const [taste, setTaste] = useState<string>('');
 
-  function done() {
-    Alert.alert("Nice work", "You brought your attention back to the present.");
+  async function done() {
+    await useStressHistoryStore
+      .getState()
+      .addStressCompletion('grounding-54321', t('grounding.title'));
+    Alert.alert(t('common.niceWork'), t('common.groundingSuccess'));
     router.back();
   }
 
@@ -29,87 +35,99 @@ export default function Grounding() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background, padding: UI.spacing.xl, paddingTop: 18 }}>
-      <ScreenHeader
-        title="Stress Management"
-        subtitle="Quick tools for calming your body and clearing your mind."
-      />
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+        padding: UI.spacing.xl,
+        paddingTop: Platform.OS === 'ios' ? 18 : 8,
+      }}
+    >
+      <ScreenHeader title={t('grounding.title')} subtitle={t('grounding.subtitle')} showBack />
       <ScrollView style={{ flex: 1, marginTop: 14 }} contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 16 }}>
-          <Text style={{ fontSize: 18, fontWeight: "900", color: colors.text }}>Grounding 5–4–3–2–1</Text>
+          <Text style={{ fontSize: 18, fontWeight: '900', color: colors.text }}>
+            {t('grounding.howItWorks')}
+          </Text>
           <Text style={{ color: colors.mutedText, marginTop: 6 }}>
-            Fill what you can. No pressure — a few words each is enough.
+            {t('grounding.description')}
           </Text>
         </View>
 
-        <Block title="5 things you can see">
+        <Block title={t('grounding.see')}>
           {sights.map((v, i) => (
             <TextInput
-              key={i}
+              key={`see-${i}`}
               value={v}
-              onChangeText={(t) => setSights((p) => p.map((x, idx) => (idx === i ? t : x)))}
-              placeholder={`See #${i + 1}`}
+              onChangeText={(tVal) => setSights((p) => p.map((x, idx) => (idx === i ? tVal : x)))}
+              placeholder={t('grounding.seePlaceholder', { count: i + 1 })}
               placeholderTextColor={colors.placeholder}
               style={inputStyle}
             />
           ))}
         </Block>
 
-        <Block title="4 things you can feel">
+        <Block title={t('grounding.feel')}>
           {touch.map((v, i) => (
             <TextInput
-              key={i}
+              key={`feel-${i}`}
               value={v}
-              onChangeText={(t) => setTouch((p) => p.map((x, idx) => (idx === i ? t : x)))}
-              placeholder={`Feel #${i + 1}`}
+              onChangeText={(tVal) => setTouch((p) => p.map((x, idx) => (idx === i ? tVal : x)))}
+              placeholder={t('grounding.feelPlaceholder', { count: i + 1 })}
               placeholderTextColor={colors.placeholder}
               style={inputStyle}
             />
           ))}
         </Block>
 
-        <Block title="3 things you can hear">
+        <Block title={t('grounding.hear')}>
           {sounds.map((v, i) => (
             <TextInput
-              key={i}
+              key={`hear-${i}`}
               value={v}
-              onChangeText={(t) => setSounds((p) => p.map((x, idx) => (idx === i ? t : x)))}
-              placeholder={`Hear #${i + 1}`}
+              onChangeText={(tVal) => setSounds((p) => p.map((x, idx) => (idx === i ? tVal : x)))}
+              placeholder={t('grounding.hearPlaceholder', { count: i + 1 })}
               placeholderTextColor={colors.placeholder}
               style={inputStyle}
             />
           ))}
         </Block>
 
-        <Block title="2 things you can smell">
+        <Block title={t('grounding.smell')}>
           {smells.map((v, i) => (
             <TextInput
-              key={i}
+              key={`smell-${i}`}
               value={v}
-              onChangeText={(t) => setSmells((p) => p.map((x, idx) => (idx === i ? t : x)))}
-              placeholder={`Smell #${i + 1}`}
+              onChangeText={(tVal) => setSmells((p) => p.map((x, idx) => (idx === i ? tVal : x)))}
+              placeholder={t('grounding.smellPlaceholder', { count: i + 1 })}
               placeholderTextColor={colors.placeholder}
               style={inputStyle}
             />
           ))}
         </Block>
 
-        <Block title="1 thing you can taste">
+        <Block title={t('grounding.taste')}>
           <TextInput
             value={taste}
             onChangeText={setTaste}
-            placeholder="Taste…"
+            placeholder={t('grounding.tastePlaceholder')}
             placeholderTextColor={colors.placeholder}
             style={inputStyle}
           />
         </Block>
 
-        <View style={{ flexDirection: "row", gap: 12, marginTop: 12 }}>
-          <Pressable onPress={done} style={{ flex: 1, backgroundColor: colors.primary, padding: 16, borderRadius: UI.radius.lg, alignItems: "center" }}>
-            <Text style={{ color: colors.onPrimary, fontWeight: "900" }}>Finish</Text>
-          </Pressable>
-          <Pressable onPress={() => router.back()} style={{ flex: 1, backgroundColor: colors.divider, padding: 16, borderRadius: UI.radius.lg, alignItems: "center" }}>
-            <Text style={{ fontWeight: "900", color: colors.text }}>Back</Text>
+        <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
+          <Pressable
+            onPress={done}
+            style={{
+              flex: 1,
+              backgroundColor: colors.primary,
+              padding: 16,
+              borderRadius: UI.radius.lg,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: colors.onPrimary, fontWeight: '900' }}>{t('common.finish')}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -118,12 +136,19 @@ export default function Grounding() {
 }
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
-  const theme = useColorScheme() ?? "light";
+  const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
 
   return (
-    <View style={{ backgroundColor: colors.card, borderRadius: UI.radius.lg, padding: 14, marginTop: 12 }}>
-      <Text style={{ fontWeight: "900", color: colors.text }}>{title}</Text>
+    <View
+      style={{
+        backgroundColor: colors.card,
+        borderRadius: UI.radius.lg,
+        padding: 14,
+        marginTop: 12,
+      }}
+    >
+      <Text style={{ fontWeight: '900', color: colors.text }}>{title}</Text>
       <View style={{ marginTop: 10, gap: 10 }}>{children}</View>
     </View>
   );

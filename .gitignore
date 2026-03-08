@@ -5,6 +5,8 @@ node_modules/
 
 .idea/
 
+coverage/
+
 # Expo
 .expo/
 dist/
@@ -43,3 +45,11 @@ app-example
 # generated native folders
 /ios
 /android
+
+.env
+.env.*
+seed_users.js
+
+schema.supabase
+supabase/.temp
+supabase/migrations

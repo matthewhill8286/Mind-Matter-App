@@ -1,19 +1,51 @@
-export type ChatMessage = { role: "user" | "assistant"; content: string };
+import { useAuthStore } from '@/store/useAuthStore';
 
-const SERVER_URL = "http://localhost:8787"; // change to LAN IP for real device
+export const API_URL = (process.env.EXPO_PUBLIC_API_URL as string) || 'http://localhost:4000';
 
-export async function sendChat(params: {
-    issueKey: string;
-    issueTitle?: string;
-    issueTags?: string[];
-    messages: ChatMessage[];
-}) {
-    const r = await fetch(`${SERVER_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
-    });
+export async function apiFetch<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const { session, user } = useAuthStore.getState();
 
-    if (!r.ok) throw new Error(await r.text());
-    return (await r.json()) as { text: string };
+  const token = session?.access_token;
+  const userId = user?.id;
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(userId ? { 'X-User-Id': userId } : {}),
+    ...options.headers,
+  };
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    let errorMsg = 'An error occurred';
+    try {
+      const data = await response.json();
+      errorMsg = (data && (data.error || data.message)) || errorMsg;
+    } catch {
+      const text = await response.text();
+      errorMsg = text || errorMsg;
+    }
+    throw new Error(errorMsg);
+  }
+
+  // Handle empty/204 responses gracefully
+  if (response.status === 204) {
+    return undefined as unknown as T;
+  }
+  const contentLength = response.headers.get('content-length');
+  if (contentLength === '0' || contentLength === null) {
+    try {
+      const text = await response.text();
+      if (!text) return undefined as unknown as T;
+      return JSON.parse(text) as T;
+    } catch {
+      return undefined as unknown as T;
+    }
+  }
+
+  return response.json() as Promise<T>;
 }

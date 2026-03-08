@@ -1,10 +1,13 @@
-import { Tabs } from "expo-router";
-import React from "react";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
+import { IconSymbol } from '@/components/icon-symbol';
+import { useTranslation } from 'react-i18next';
 
 export default function TabsLayout() {
-  const theme = useColorScheme() ?? "light";
+  const { t } = useTranslation();
+  const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
 
   return (
@@ -20,29 +23,62 @@ export default function TabsLayout() {
       }}
     >
       {/* Visible tabs */}
-      <Tabs.Screen name="home" options={{ title: "Home" }} />
-      <Tabs.Screen name="chat" options={{ title: "Chat" }} />
-      <Tabs.Screen name="journal" options={{ title: "Journal" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: t('tabs.home'),
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: t('tabs.chat'),
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="text.bubble" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: t('tabs.search'),
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="1.magnifyingglass" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="journal"
+        options={{
+          title: t('tabs.journal'),
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="note.text" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: t('tabs.profile'),
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.2.fill" color={color} />,
+        }}
+      />
 
-      {/* Hidden routes (still inside tabs so the tab bar stays visible when navigating) */}
-      <Tabs.Screen name="stress/index" options={{ href: null, title: "Stress" }} />
-      <Tabs.Screen name="stress/breathing" options={{ href: null, title: "Breathing" }} />
-      <Tabs.Screen name="stress/grounding" options={{ href: null, title: "Grounding" }} />
-      <Tabs.Screen name="stress/plan" options={{ href: null, title: "Stress Plan" }} />
-      <Tabs.Screen name="mood" options={{ href: null, title: "Mood" }} />
-      <Tabs.Screen name="sleep" options={{ href: null, title: "Sleep" }} />
-      <Tabs.Screen name="mindful-hours" options={{ href: null, title: "Mindful" }} />
-      <Tabs.Screen name="notifications" options={{ href: null, title: "Notifications" }} />
-      <Tabs.Screen name="community" options={{ href: null, title: "Community" }} />
-      <Tabs.Screen name="resources-tab" options={{ href: null, title: "Resources" }} />
-      <Tabs.Screen name="resources" options={{ href: null, title: "Resources" }} />
-      <Tabs.Screen name="settings" options={{ href: null, title: "Settings" }} />
-        <Tabs.Screen name="help-center" options={{href: null, title: "help-center"}} />
-      <Tabs.Screen name="utilities" options={{href: null, title: "utilities"}} />
-      <Tabs.Screen name="offline" options={{href: null, title: "offline"}} />
-      <Tabs.Screen name="empty" options={{href: null, title: "empty"}}/>
-      <Tabs.Screen name="error" options={{href: null, title: "error"}} />
-</Tabs>
+      {/* Hidden from the tab bar but present for tab layout persistence */}
+      <Tabs.Screen name="stress" options={{ href: null }} />
+      <Tabs.Screen
+        name="mood"
+        options={{
+          href: null,
+          title: t('tabs.mood'),
+        }}
+      />
+      <Tabs.Screen name="sleep" options={{ href: null }} />
+      <Tabs.Screen name="chat/history" options={{ href: null }} />
+      <Tabs.Screen name="chat/[issueKey]" options={{ href: null }} />
+      <Tabs.Screen name="mindful-hours" options={{ href: null }} />
+      <Tabs.Screen name="community" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="settings" options={{ href: null }} />
+      <Tabs.Screen name="profile-edit" options={{ href: null }} />
+      <Tabs.Screen name="profile-overview" options={{ href: null }} />
+    </Tabs>
   );
 }

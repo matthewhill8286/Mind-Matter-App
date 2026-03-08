@@ -1,21 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  Easing,
-  Image,
-  Platform,
-} from "react-native";
-import { useRouter } from "expo-router";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Easing, Image, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type Stage = "splash" | "quote" | "loading";
+type Stage = 'splash' | 'quote' | 'loading';
 
 export default function SplashLoading() {
   const router = useRouter();
 
-  const [stage, setStage] = useState<Stage>("splash");
+  const [stage, setStage] = useState<Stage>('splash');
   const [pct, setPct] = useState(0);
 
   const fade = useRef(new Animated.Value(1)).current;
@@ -27,15 +21,15 @@ export default function SplashLoading() {
   const [readyToFinish, setReadyToFinish] = useState(false);
 
   const bg = useMemo(() => {
-    if (stage === "splash") return COLORS.splash;
-    if (stage === "quote") return COLORS.quote;
+    if (stage === 'splash') return COLORS.splash;
+    if (stage === 'quote') return COLORS.quote;
     return COLORS.loading;
   }, [stage]);
 
   // Stage sequencing (splash -> quote -> loading)
   useEffect(() => {
-    const a = setTimeout(() => transitionTo("quote"), 1100);
-    const b = setTimeout(() => transitionTo("loading"), 1100 + 2200);
+    const a = setTimeout(() => transitionTo('quote'), 1100);
+    const b = setTimeout(() => transitionTo('loading'), 1100 + 2200);
     return () => {
       clearTimeout(a);
       clearTimeout(b);
@@ -45,7 +39,7 @@ export default function SplashLoading() {
 
   // Native-like loading: jump to ~92, creep to 97, then finish to 100
   useEffect(() => {
-    if (stage !== "loading") return;
+    if (stage !== 'loading') return;
 
     setPct(0);
     setReadyToFinish(false);
@@ -89,7 +83,7 @@ export default function SplashLoading() {
 
   // Finish when “readyToFinish” becomes true
   useEffect(() => {
-    if (stage !== "loading") return;
+    if (stage !== 'loading') return;
     if (!readyToFinish) return;
 
     // 4) Final snap to 100% (short and satisfying)
@@ -102,8 +96,14 @@ export default function SplashLoading() {
       if (!finished) return;
       setPct(100);
 
-      // Go to Sign In
-      router.replace("/(auth)/sign-in");
+      // Go to Welcome Slides or Sign In
+      AsyncStorage.getItem('onboarding:seen:v1').then((seen) => {
+        if (!seen) {
+          router.replace('/(onboarding)/welcome');
+        } else {
+          router.replace('/index' as any); // Let index handle the routing gate
+        }
+      });
     });
   }, [readyToFinish, router, stage, progress]);
 
@@ -115,47 +115,43 @@ export default function SplashLoading() {
   }
 
   return (
-      <View style={[styles.screen, { backgroundColor: bg }]}>
-        {/* Grain overlay (subtle) */}
-        <GrainOverlay />
+    <View style={[styles.screen, { backgroundColor: bg }]}>
+      {/* Grain overlay (subtle) */}
+      <GrainOverlay />
 
-        <Animated.View style={[styles.content, { opacity: fade }]}>
-          {stage === "splash" ? <SplashStage /> : null}
-          {stage === "quote" ? <QuoteStage /> : null}
-          {stage === "loading" ? <LoadingStage pct={pct} /> : null}
-        </Animated.View>
-      </View>
+      <Animated.View style={[styles.content, { opacity: fade }]}>
+        {stage === 'splash' ? <SplashStage /> : null}
+        {stage === 'quote' ? <QuoteStage /> : null}
+        {stage === 'loading' ? <LoadingStage pct={pct} /> : null}
+      </Animated.View>
+    </View>
   );
 }
 
 function SplashStage() {
+  const { t } = useTranslation();
   return (
-      <View style={styles.center}>
-        <Text style={styles.logo}>MIND MATE</Text>
-      </View>
+    <View style={styles.center}>
+      <Text style={styles.logo}>{t('splash.logo')}</Text>
+    </View>
   );
 }
 
 function QuoteStage() {
+  const { t } = useTranslation();
   return (
-      <View style={[styles.center, { paddingHorizontal: 28, alignItems: "flex-start" }]}>
-        <Text style={styles.quote}>
-          “Let everything{"\n"}
-          happen to you{"\n"}
-          beauty and terror.{"\n"}
-          Just keep going.{"\n"}
-          No feeling is final.”
-        </Text>
-        <Text style={styles.quoteAuthor}>— RAINER MARIA RILKE</Text>
-      </View>
+    <View style={[styles.center, { paddingHorizontal: 28, alignItems: 'center' }]}>
+      <Text style={styles.quote}>{t('splash.quote')}</Text>
+      <Text style={styles.quoteAuthor}>{t('splash.quoteAuthor')}</Text>
+    </View>
   );
 }
 
 function LoadingStage({ pct }: { pct: number }) {
   return (
-      <View style={styles.center}>
-        <Text style={styles.loadingPct}>{pct}%</Text>
-      </View>
+    <View style={styles.center}>
+      <Text style={styles.loadingPct}>{pct}%</Text>
+    </View>
   );
 }
 
@@ -168,18 +164,18 @@ function LoadingStage({ pct }: { pct: number }) {
  */
 function GrainOverlay() {
   return (
-      <Image
-          source={{ uri: NOISE_TILE }}
-          style={styles.grain}
-          resizeMode={Platform.OS === "ios" ? "repeat" : "cover"}
-      />
+    <Image
+      source={{ uri: NOISE_TILE }}
+      style={styles.grain}
+      resizeMode={Platform.OS === 'ios' ? 'repeat' : 'cover'}
+    />
   );
 }
 
 const COLORS = {
-  splash: "#F6F4F2",   // off-white
-  quote: "#7C8063",    // olive/green
-  loading: "#9A7A4D",  // warm brown
+  splash: '#F6F4F2', // off-white
+  quote: '#7C8063', // olive/green
+  loading: '#9A7A4D', // warm brown
 };
 
 const styles = StyleSheet.create({
@@ -188,35 +184,36 @@ const styles = StyleSheet.create({
 
   center: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   logo: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: '900',
     letterSpacing: 1.2,
-    color: "#141414",
+    color: '#141414',
   },
 
   quote: {
-    fontSize: 18,
-    fontWeight: "800",
-    lineHeight: 24,
-    color: "rgba(255,255,255,0.92)",
+    fontSize: 20,
+    fontWeight: '800',
+    lineHeight: 28,
+    color: 'rgba(255,255,255,0.92)',
+    textAlign: 'center',
   },
   quoteAuthor: {
     marginTop: 18,
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: '800',
     letterSpacing: 1,
-    color: "rgba(255,255,255,0.7)",
+    color: 'rgba(255,255,255,0.7)',
   },
 
   loadingPct: {
     fontSize: 16,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.9)",
+    fontWeight: '800',
+    color: 'rgba(255,255,255,0.9)',
   },
 
   grain: {
@@ -228,14 +225,14 @@ const styles = StyleSheet.create({
 // Tiny noise tile (data URI). Small + subtle.
 // If you want a different grain “feel”, I can generate a stronger/weaker tile.
 const NOISE_TILE =
-    "data:image/png;base64," +
-    "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAQAAAAAYLlVAAAAw0lEQVR42u2YwQ3CMAxFv5bA" +
-    "Cq2QGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQ" +
-    "GmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGm" +
-    "QGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG" +
-    "mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG" +
-    "mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG" +
-    "mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG" +
-    "mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG" +
-    "mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG" +
-    "mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGgY3yQx2H0jNAAAAAElFTkSuQmCC";
+  'data:image/png;base64,' +
+  'iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAQAAAAAYLlVAAAAw0lEQVR42u2YwQ3CMAxFv5bA' +
+  'Cq2QGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQ' +
+  'GmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGm' +
+  'QGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG' +
+  'mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG' +
+  'mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG' +
+  'mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG' +
+  'mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG' +
+  'mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQG' +
+  'mQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGmQGgY3yQx2H0jNAAAAAElFTkSuQmCC';

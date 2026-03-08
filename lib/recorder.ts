@@ -1,11 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from 'react';
 import {
   AudioModule,
   RecordingPresets,
   setAudioModeAsync,
+  useAudioPlayer,
   useAudioRecorder,
   useAudioRecorderState,
-} from "expo-audio";
+} from 'expo-audio';
 
 export function useRecorder(preset = RecordingPresets.HIGH_QUALITY) {
   const recorder = useAudioRecorder(preset);
@@ -14,7 +15,7 @@ export function useRecorder(preset = RecordingPresets.HIGH_QUALITY) {
   useEffect(() => {
     (async () => {
       const perm = await AudioModule.requestRecordingPermissionsAsync();
-      if (!perm.granted) throw new Error("Microphone permission not granted");
+      if (!perm.granted) throw new Error('Microphone permission not granted');
 
       await setAudioModeAsync({
         allowsRecording: true,
@@ -32,19 +33,37 @@ export function useRecorder(preset = RecordingPresets.HIGH_QUALITY) {
     await recorder.stop();
 
     const uri = recorder.uri;
-    const durationMs =
-        typeof state.durationMillis === "number" ? state.durationMillis : 0;
+    const durationMs = state.durationMillis ?? 0;
 
-    if (!uri) throw new Error("No recording URI");
+    if (!uri) throw new Error('No recording URI');
     return { uri, durationMs };
   }
 
   return {
-    isRecording: !!state.isRecording,
-    durationMs: typeof state.durationMillis === "number" ? state.durationMillis : 0,
+    isRecording: state.isRecording,
+    durationMs: state.durationMillis ?? 0,
     uri: recorder.uri ?? null,
     startRecording,
     stopRecording,
+  };
+}
+
+export function usePlayer(uri: string | null) {
+  const player = useAudioPlayer(uri);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    const sub = player.addListener('playbackStatusUpdate', (status) => {
+      setIsPlaying(status.playing);
+    });
+    return () => sub.remove();
+  }, [player]);
+
+  return {
+    play: () => player.play(),
+    pause: () => player.pause(),
+    isPlaying,
+    player,
   };
 }
 
