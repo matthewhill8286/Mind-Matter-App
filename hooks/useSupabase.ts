@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { SupabaseClient, Session } from '@supabase/supabase-js';
 
 import { SupabaseContext } from '@/context/supabase-context';
-import { useAuthStore } from '@/store/useAuthStore';
+import { authStore } from '@/store/authStore';
 
 interface UseSupabaseProps {
   isLoaded: boolean;
@@ -14,7 +14,7 @@ interface UseSupabaseProps {
 
 export const useSupabase = (): UseSupabaseProps => {
   const supabase = useContext(SupabaseContext);
-  const { session, loading, signOut } = useAuthStore();
+  const { session, loading, signOut } = authStore();
 
   if (!supabase) {
     throw new Error('useSupabase must be used within a SupabaseProvider');

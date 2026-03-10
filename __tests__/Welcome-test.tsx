@@ -32,7 +32,7 @@ describe('Welcome Screen', () => {
     const mockRouter = require('expo-router').useRouter();
 
     // First slide
-    expect(getByText('Welcome to MindMate!')).toBeTruthy();
+    expect(getByText('Welcome to MindMatters!')).toBeTruthy();
     expect(queryByTestId('back-button')).toBeNull();
 
     // Next to second slide
@@ -42,7 +42,7 @@ describe('Welcome Screen', () => {
 
     // Go back
     fireEvent.press(getByTestId('back-button'));
-    expect(getByText('Welcome to MindMate!')).toBeTruthy();
+    expect(getByText('Welcome to MindMatters!')).toBeTruthy();
 
     // Go to end (6 slides total)
     fireEvent.press(getByTestId('next-button')); // slide 1

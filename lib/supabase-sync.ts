@@ -39,7 +39,7 @@
  */
 
 import { supabase } from './supabase';
-import { useAuthStore } from '@/store/useAuthStore';
+import { authStore } from '@/store/authStore';
 
 /**
  * @deprecated Use the new table clients from supabase-client.ts instead
@@ -51,7 +51,7 @@ import { useAuthStore } from '@/store/useAuthStore';
  * ```
  */
 export function getUserIdOrThrow(): string {
-  const { user } = useAuthStore.getState();
+  const { user } = authStore.getState();
   if (!user) {
     throw new Error('No user session found. Please sign in again.');
   }

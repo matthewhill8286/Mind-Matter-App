@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mindmate.app",
+      "bundleIdentifier": "com.mindmateapp.app",
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone.",

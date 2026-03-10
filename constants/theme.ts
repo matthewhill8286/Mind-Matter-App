@@ -1,5 +1,5 @@
 /**
- * MindMate theme tokens (warm, earthy, soft UI)
+ * MindMatters theme tokens (warm, earthy, soft UI)
  * Matches the design board: cream background, brown primary, sage accents.
  */
 

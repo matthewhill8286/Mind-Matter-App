@@ -43,7 +43,7 @@ describe('TrialUpgrade Screen', () => {
       </QueryClientProvider>,
     );
 
-    expect(getByText('MindMate Premium')).toBeTruthy();
+    expect(getByText('MindMatters Premium')).toBeTruthy();
     expect(getByText('7-Day Free Trial')).toBeTruthy();
     expect(getByText('Monthly Access')).toBeTruthy();
     expect(getByText('10€/mo')).toBeTruthy();

@@ -36,7 +36,7 @@ const createAlertSlice: SliceCreator<AlertSlice> = (set, get) => ({
   hideAlert: () => set({ alert: { ...get().alert, visible: false } }),
 });
 
-// Auth slice removed - use useAuthStore from @/store/useAuthStore instead
+// Auth slice removed - use authStore from @/store/authStore instead
 
 // For backward compatibility during migration
 interface LegacyActions {
@@ -102,7 +102,7 @@ export const showAlert = (title: string, message: string, actions?: AlertAction[
 
 export const hideAlert = () => useGlobalStore.getState().hideAlert();
 
-// Auth exports removed - use useAuthStore from @/store/useAuthStore instead
+// Auth exports removed - use authStore from @/store/authStore instead
 // export const useUser, useSession, useAuthInitialized, setSession have been migrated
 
 /**

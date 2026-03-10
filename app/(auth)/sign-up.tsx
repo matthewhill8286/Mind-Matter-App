@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { useAuthStore } from '@/store/useAuthStore';
+import { authStore } from '@/store/authStore';
 
 export default function SignUp() {
   const { t } = useTranslation();
-  const { signUpWithEmail, submitting, error: authError, clearError } = useAuthStore();
+  const { signUpWithEmail, submitting, error: authError, clearError } = authStore();
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export default function SignUp() {
     const error = await signUpWithEmail(email, pass);
     if (!error) {
       // Check if session was created (email confirmation may be required)
-      const { session } = useAuthStore.getState();
+      const { session } = authStore.getState();
       if (!session) {
         setLocalError(t('auth.checkEmailForConfirmation'));
         return;
@@ -34,7 +34,11 @@ export default function SignUp() {
     <View style={{ flex: 1, backgroundColor: '#6f6660', padding: 24, justifyContent: 'center' }}>
       <View style={{ backgroundColor: 'white', borderRadius: 28, padding: 26 }}>
         <Text style={{ fontSize: 26, fontWeight: '900' }}>{t('auth.signUp')}</Text>
-        {(authError || localError) && <Text style={{ color: 'red', marginTop: 12, fontWeight: '600' }}>{authError || localError}</Text>}
+        {(authError || localError) && (
+          <Text style={{ color: 'red', marginTop: 12, fontWeight: '600' }}>
+            {authError || localError}
+          </Text>
+        )}
         <Text style={{ marginTop: 18, fontWeight: '900' }}>{t('auth.email')}</Text>
         <TextInput
           value={email}

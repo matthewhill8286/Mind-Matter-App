@@ -116,7 +116,7 @@ export default function ProfileCompletion() {
               <View style={{ marginTop: 10 }}>
                 <ScoreCard
                   score={wellness.score}
-                  title="MindMate Wellness Score"
+                  title="MindMatters Wellness Score"
                   subtitle="A gentle baseline of wellbeing today."
                   bg="#6bbf8e"
                 />

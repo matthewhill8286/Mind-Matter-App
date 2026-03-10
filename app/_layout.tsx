@@ -6,14 +6,14 @@ import { useSleepDetection } from '@/hooks/useSleepDetection';
 import { useEffect, useRef } from 'react';
 import * as Notifications from 'expo-notifications';
 import { registerForPushNotificationsAsync } from '@/lib/notifications';
-import { useAuthStore } from '@/store/useAuthStore';
+import { authStore } from '@/store/authStore';
 import './../i18n';
 import { SupabaseProvider } from '@/providers/supabase-provider';
 
 export default function RootLayout() {
   const notificationListener = useRef<Notifications.Subscription>(null);
   const responseListener = useRef<Notifications.Subscription>(null);
-  const { user, loading, initialize } = useAuthStore();
+  const { user, loading, initialize } = authStore();
   const segments = useSegments();
   const router = useRouter();
 

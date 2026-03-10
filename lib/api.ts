@@ -1,9 +1,9 @@
-import { useAuthStore } from '@/store/useAuthStore';
+import { authStore } from '@/store/authStore';
 
 export const API_URL = (process.env.EXPO_PUBLIC_API_URL as string) || 'http://localhost:4000';
 
 export async function apiFetch<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const { session, user } = useAuthStore.getState();
+  const { session, user } = authStore.getState();
 
   const token = session?.access_token;
   const userId = user?.id;

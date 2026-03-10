@@ -18,8 +18,8 @@ export default function UpgradeRequired() {
           Trial Expired
         </Text>
         <Text style={{ opacity: 0.7, marginTop: 12, textAlign: 'center', lineHeight: 22 }}>
-          Your 7-day free trial has come to an end. To continue using MindMate and access your data,
-          please upgrade to lifetime access.
+          Your 7-day free trial has come to an end. To continue using MindMatters and access your
+          data, please upgrade to lifetime access.
         </Text>
 
         <Pressable

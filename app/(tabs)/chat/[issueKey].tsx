@@ -18,14 +18,14 @@ import { IconSymbol } from '@/components/icon-symbol';
 import { SkeletonRect } from '@/components/Skeleton';
 import TypingBubble from '@/components/TypingBubble';
 import { sendChatToAI } from '@/lib/chat';
-import { useChatStore } from '@/store/useChatStore';
+import { chatStore } from '@/store/chatStore';
 import { ChatMessage } from '@/lib/types';
 
 export default function Chat() {
   const { issueKey } = useLocalSearchParams<{ issueKey: string }>();
   const issue = useMemo(() => ISSUES.find((i) => i.key === issueKey), [issueKey]);
 
-  const { history, fetchHistory, addMessage, clearHistory } = useChatStore();
+  const { history, fetchHistory, addMessage, clearHistory } = chatStore();
   const isGlobalLoading = useIsLoading();
   const messages = useMemo(() => (issueKey ? history[issueKey] || [] : []), [history, issueKey]);
   const [loading, setLoading] = useState(true);

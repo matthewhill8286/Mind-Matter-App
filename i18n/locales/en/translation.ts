@@ -12,7 +12,7 @@ export default {
     slides: {
       0: {
         step: 'Welcome',
-        title: 'Welcome to MindMate!',
+        title: 'Welcome to MindMatters!',
         text: 'Your AI companion for mental wellbeing. Supportive conversations, thoughtful guidance, anytime, anywhere.',
       },
       1: {
@@ -59,7 +59,7 @@ export default {
     alreadyHaveAccount: 'Already have an account? Sign in',
     emailPasswordRequired: 'Email and password are required',
     choosePlan: 'Choose your plan',
-    unlockFullExperience: 'Unlock the full MindMate experience with our premium features.',
+    unlockFullExperience: 'Unlock the full MindMatters experience with our premium features.',
     start7DayTrial: '7-Day Free Trial',
     sevenDayTrialDesc: 'Try all features free for one week.',
     startFreeTrialBtn: 'Start Free Trial',
@@ -71,7 +71,7 @@ export default {
     lifetimePlan: 'Lifetime Access',
     lifetimePlanPrice: '72€',
     lifetimePlanDesc: 'Unlock everything forever. Best value.',
-    premiumTitle: 'MindMate Premium',
+    premiumTitle: 'MindMatters Premium',
     premiumSubtitle: 'Choose a plan to unlock all features.',
     termsAndPrivacy:
       'By continuing, you agree to our Terms of Service and Privacy Policy. Your trial will automatically end after 7 days unless you upgrade.',
@@ -185,7 +185,7 @@ export default {
     dailyAffirmation: 'Daily Affirmation',
     wellnessSnapshot: 'Wellness Snapshot',
     moodTrends: 'Mood Trends',
-    mindMateWellnessScore: 'MindMate Wellness Score',
+    mindMateWellnessScore: 'MindMatters Wellness Score',
     wellbeingBaseline: 'Your current wellbeing baseline.',
     stressLoad: 'Stress Load',
     keepStressManageable: 'Let’s keep your stress levels manageable.',

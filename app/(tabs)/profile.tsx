@@ -9,7 +9,7 @@ import { Colors, UI } from '@/constants/theme';
 import { IconSymbol } from '@/components/icon-symbol';
 import { SkeletonRect } from '@/components/Skeleton';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '@/store/useAuthStore';
+import { authStore } from '@/store/authStore';
 
 import { useMoodStore } from '@/store/useMoodStore';
 import { useJournalStore } from '@/store/useJournalStore';
@@ -17,7 +17,7 @@ import { useSleepStore } from '@/store/useSleepStore';
 import { useMindfulnessStore } from '@/store/useMindfulnessStore';
 import { useStressHistoryStore } from '@/store/useStressHistoryStore';
 import { useStressStore } from '@/store/useStressStore';
-import { useChatStore } from '@/store/useChatStore';
+import { chatStore } from '@/store/chatStore';
 import { ActionCard } from '@/components/ActionCard';
 
 export default function Profile() {
@@ -25,7 +25,7 @@ export default function Profile() {
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
   const { profile, fetchProfile } = useProfileStore();
-  const { user, signOut: authSignOut } = useAuthStore();
+  const { user, signOut: authSignOut } = authStore();
   const [loading, setLoading] = useState(true);
   const { subscription, isExpired, isLifetime } = useSubscription();
 
@@ -46,7 +46,7 @@ export default function Profile() {
     useMindfulnessStore.getState().clearMindfulness();
     useStressHistoryStore.getState().clearStressHistory();
     useStressStore.getState().clearStress();
-    useChatStore.getState().clearAllChat();
+    chatStore.getState().clearAllChat();
     await authSignOut();
   }
 

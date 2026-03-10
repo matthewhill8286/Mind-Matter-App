@@ -32,16 +32,25 @@ const createChatSlice: SliceCreator<ChatState & ChatActions, LoadingState> = (se
     const { startLoading, stopLoading } = api.getState();
     startLoading(`fetchHistory:${issueKey}`);
     set({ error: null });
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error('User not authenticated');
+      set({ error: 'User not authenticated' });
+    }
+
     try {
-      const userId = getUserIdOrThrow();
       const { data, error } = await supabase
         .from('chat_histories')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', user?.id)
         .eq('issue_key', issueKey)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) set({ error: error.message });
 
       if (data && data.messages) {
         set((state) => ({
@@ -61,16 +70,26 @@ const createChatSlice: SliceCreator<ChatState & ChatActions, LoadingState> = (se
     const { startLoading, stopLoading } = api.getState();
     startLoading('fetchAllHistories');
     set({ error: null });
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error('User not authenticated');
+      set({ error: 'User not authenticated' });
+    }
+
     try {
-      const userId = getUserIdOrThrow();
       const { data, error } = await supabase
         .from('chat_histories')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', user?.id);
 
-      if (error) throw error;
+      if (error) set({ error: error.message });
 
       const allHistory: Record<string, ChatMessage[]> = {};
+
       (data || []).forEach((row) => {
         allHistory[row.issue_key] = row.messages as unknown as ChatMessage[];
       });
@@ -91,13 +110,23 @@ const createChatSlice: SliceCreator<ChatState & ChatActions, LoadingState> = (se
     // Optimistic update
     set((state) => ({ history: { ...state.history, [issueKey]: updatedMessages } }));
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error('User not authenticated');
+      set({ error: 'User not authenticated' });
+    }
+
     try {
-      const { error } = await syncToSupabase(
-        'chat_histories',
-        { issue_key: issueKey, messages: updatedMessages as any },
-        { matchColumn: 'issue_key', onConflict: 'user_id,issue_key' },
-      );
-      if (error) throw error;
+      const { error } = await supabase
+        .from('chat_histories')
+        .upsert({ updatedMessages, user_id: user?.id })
+        .select()
+        .single();
+
+      if (error) set({ error: error.message });
     } catch (err) {
       // Rollback on failure
       console.error('Failed to update chat history in Supabase:', err);
@@ -107,23 +136,34 @@ const createChatSlice: SliceCreator<ChatState & ChatActions, LoadingState> = (se
 
   clearHistory: async (issueKey: string) => {
     set((state) => ({ history: { ...state.history, [issueKey]: [] } }));
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error('User not authenticated');
+      set({ error: 'User not authenticated' });
+    }
+
     try {
-      const userId = getUserIdOrThrow();
       const { error } = await supabase
         .from('chat_histories')
         .delete()
-        .eq('user_id', userId)
+        .eq('user_id', user?.id)
         .eq('issue_key', issueKey);
-      if (error) throw error;
+
+      if (error) set({ error: error.message });
     } catch (err) {
       console.error('Failed to clear chat history in Supabase:', err);
+      set({ error: 'Failed to clear chat history' });
     }
   },
 
   clearAllChat: () => set({ history: {} }),
 });
 
-export const useChatStore = create<ChatStore>()(
+export const chatStore = create<ChatStore>()(
   persist(
     (set, get, api) => ({
       ...createChatSlice(set, get, api),

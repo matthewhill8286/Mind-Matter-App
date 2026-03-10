@@ -5,12 +5,12 @@ import { router } from 'expo-router';
 import { ISSUES } from '@/data/issues';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
-import { useChatStore } from '@/store/useChatStore';
+import { chatStore } from '@/store/chatStore';
 
 export default function ChatHistory() {
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
-  const { history, fetchAllHistories, isLoading, error } = useChatStore();
+  const { history, fetchAllHistories, isLoading, error } = chatStore();
 
   useEffect(() => {
     (async () => {

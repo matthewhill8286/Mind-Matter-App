@@ -26,7 +26,7 @@ describe('ProfileCompletion Screen', () => {
 
     await waitFor(() => {
       expect(getByText('Nice to meet you, Jane')).toBeTruthy();
-      expect(getByText('MindMate Wellness Score')).toBeTruthy();
+      expect(getByText('MindMatters Wellness Score')).toBeTruthy();
     });
   });
 

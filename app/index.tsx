@@ -3,13 +3,13 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, ActivityIndicator } from 'react-native';
 import { useProfileStore } from '@/store/useProfileStore';
-import { useAuthStore } from '@/store/useAuthStore';
+import { authStore } from '@/store/authStore';
 
 import { useMoodStore } from '@/store/useMoodStore';
 import { useSleepStore } from '@/store/useSleepStore';
 import { useJournalStore } from '@/store/useJournalStore';
 import { useStressStore } from '@/store/useStressStore';
-import { useChatStore } from '@/store/useChatStore';
+import { chatStore } from '@/store/chatStore';
 import { useMindfulnessStore } from '@/store/useMindfulnessStore';
 
 export default function Index() {
@@ -19,7 +19,7 @@ export default function Index() {
         const onboardingSeen = await AsyncStorage.getItem('onboarding:seen:v1');
         if (!onboardingSeen) return router.replace('/(onboarding)/splash-loading');
 
-        const { session } = useAuthStore.getState();
+        const { session } = authStore.getState();
         if (!session) return router.replace('/(auth)/sign-in');
 
         // Use the store to fetch the latest profile and assessment
@@ -44,7 +44,7 @@ export default function Index() {
           useSleepStore.getState().fetchSleepEntries(),
           useJournalStore.getState().fetchJournalEntries(),
           useStressStore.getState().fetchStressKit(),
-          useChatStore.getState().fetchAllHistories(),
+          chatStore.getState().fetchAllHistories(),
           useMindfulnessStore.getState().fetchMindfulnessHistory(),
         ]);
 

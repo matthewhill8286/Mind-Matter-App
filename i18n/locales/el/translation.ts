@@ -12,7 +12,7 @@ export default {
     slides: {
       0: {
         step: 'Καλώς ήρθατε',
-        title: 'Καλώς ήρθατε στο MindMate!',
+        title: 'Καλώς ήρθατε στο MindMatters!',
         text: 'Ο AI σύντροφός σας για την ψυχική ευεξία. Υποστηρικτικές συζητήσεις, στοχαστική καθοδήγηση, οποτεδήποτε, οπουδήποτε.',
       },
       1: {
@@ -59,7 +59,8 @@ export default {
     alreadyHaveAccount: 'Έχετε ήδη λογαριασμό; Σύνδεση',
     emailPasswordRequired: 'Το email και ο κωδικός πρόσβασης είναι υποχρεωτικά',
     choosePlan: 'Επιλέξτε το σχέδιό σας',
-    unlockFullExperience: 'Ξεκλειδώστε την πλήρη εμπειρία MindMate με τις premium λειτουργίες μας.',
+    unlockFullExperience:
+      'Ξεκλειδώστε την πλήρη εμπειρία MindMatters με τις premium λειτουργίες μας.',
     start7DayTrial: 'Δωρεάν Δοκιμή 7 Ημερών',
     sevenDayTrialDesc: 'Δοκιμάστε όλες τις λειτουργίες δωρεάν για μία εβδομάδα.',
     startFreeTrialBtn: 'Έναρξη Δωρεάν Δοκιμής',
@@ -71,7 +72,7 @@ export default {
     lifetimePlan: 'Ισόβια Πρόσβαση',
     lifetimePlanPrice: '72€',
     lifetimePlanDesc: 'Ξεκλειδώστε τα πάντα για πάντα. Η καλύτερη αξία.',
-    premiumTitle: 'MindMate Premium',
+    premiumTitle: 'MindMatters Premium',
     premiumSubtitle: 'Επιλέξτε ένα σχέδιο για να ξεκλειδώσετε όλες τις λειτουργίες.',
     termsAndPrivacy:
       'Συνεχίζοντας, συμφωνείτε με τους Όρους Χρήσης και την Πολιτική Απορρήτου μας. Η δοκιμή σας θα λήξει αυτόματα μετά από 7 ημέρες εκτός εάν αναβαθμίσετε.',
@@ -185,7 +186,7 @@ export default {
     upgradeToLifetime: 'Αναβαθμίστε σε ισόβια πρόσβαση για να ξεκλειδώσετε όλες τις δυνατότητες.',
     dailyAffirmation: 'Ημερήσια Επιβεβαίωση',
     wellnessSnapshot: 'Στιγμιότυπο Ευεξίας',
-    mindMateWellnessScore: 'Βαθμολογία Ευεξίας MindMate',
+    mindMateWellnessScore: 'Βαθμολογία Ευεξίας MindMatters',
     wellbeingBaseline: 'Η τρέχουσα βάση της ευεξίας σας.',
     stressLoad: 'Φορτίο Άγχους',
     keepStressManageable: 'Ας κρατήσουμε τα επίπεδα άγχους σας διαχειρίσιμα.',

@@ -16,7 +16,7 @@ export default function PaymentSuccess() {
         </View>
         <Text style={styles.title}>Payment Successful!</Text>
         <Text style={styles.message}>
-          Thank you for subscribing to MindMate Premium. Your account has been upgraded.
+          Thank you for subscribing to MindMatters Premium. Your account has been upgraded.
         </Text>
 
         <Pressable onPress={handleContinue} style={styles.button}>
