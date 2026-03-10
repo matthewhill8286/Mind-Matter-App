@@ -2,9 +2,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MindfulEntry, MindfulEntryInsert } from '@/lib/types';
-import { syncToSupabase } from '@/lib/supabase-sync';
 import { createLoadingSlice, LoadingState, SliceCreator } from '@/lib/zustand-helpers';
 import { supabase } from '@/lib/supabase';
+import { authStore } from '@/store/authStore';
+
+function getUserIdOrThrow(): string {
+  const { user } = authStore.getState();
+  if (!user) throw new Error('No user session found. Please sign in again.');
+  return user.id;
+}
 
 interface MindfulnessState {
   mindfulnessHistory: MindfulEntry[];
@@ -50,9 +56,12 @@ const createMindfulnessSlice: SliceCreator<MindfulnessState & MindfulnessActions
   },
 
   addMindfulMinutes: async (input) => {
-    const { data: result, error } = await syncToSupabase('mindfulness', input, {
-      matchColumn: 'id',
-    });
+    const userId = getUserIdOrThrow();
+    const { data: result, error } = await supabase
+      .from('mindfulness')
+      .upsert({ ...input, user_id: userId }, { onConflict: 'id' })
+      .select()
+      .single();
 
     if (error) throw new Error(typeof error === 'string' ? error : (error as any).message);
 
@@ -67,7 +76,7 @@ const createMindfulnessSlice: SliceCreator<MindfulnessState & MindfulnessActions
   clearMindfulness: () => set({ mindfulnessHistory: [] }),
 });
 
-export const useMindfulnessStore = create<MindfulnessStore>()(
+export const mindfulnessStore = create<MindfulnessStore>()(
   persist(
     (set, get, api) => ({
       ...createMindfulnessSlice(set, get, api),

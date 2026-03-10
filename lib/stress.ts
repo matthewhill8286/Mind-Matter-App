@@ -1,17 +1,17 @@
 import { StressKit, StressCompletion, DEFAULT_KIT } from './types';
 
 /**
- * @deprecated Use useStressStore().stressKit or useStressStore().fetchStressKit()
+ * @deprecated Use stressStore().stressKit or stressStore().fetchStressKit()
  */
 export async function getStressKit(): Promise<StressKit> {
   return DEFAULT_KIT;
 }
 
 /**
- * @deprecated Use useStressStore().saveStressKit()
+ * @deprecated Use stressStore().saveStressKit()
  */
 export async function saveStressKit(kit: StressKit): Promise<StressKit> {
-  throw new Error('Deprecated. Use useStressStore().saveStressKit() instead.');
+  throw new Error('Deprecated. Use stressStore().saveStressKit() instead.');
 }
 
 /**

@@ -3,7 +3,7 @@ import { View, Text, Pressable, TextInput, ScrollView, Platform } from 'react-na
 import { router, useLocalSearchParams } from 'expo-router';
 import ScreenHeader from '@/components/ScreenHeader';
 import Chips from '@/components/Chips';
-import { useJournalStore } from '@/store/useJournalStore';
+import { journalStore } from '@/store/journalStore';
 import { JournalEntry } from '@/lib/types';
 import { showAlert, withLoading } from '@/lib/state';
 
@@ -23,7 +23,7 @@ export default function EditJournalEntry() {
     upsertJournalEntry,
     deleteJournalEntry,
     isLoading: loading,
-  } = useJournalStore();
+  } = journalStore();
 
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<JournalEntry | null>(null);

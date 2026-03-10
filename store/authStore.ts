@@ -27,7 +27,7 @@ interface AuthState {
   // actions — profile
   fetchProfile: () => Promise<void>;
   updateProfile: (updates: UserProfileUpdate) => Promise<void>;
-  completeOnboarding: (data: { name: string }) => Promise<void>;
+  completeOnboarding: (data: UserProfileUpdate) => Promise<void>;
 
   // helpers
   clearError: () => void;
@@ -165,10 +165,8 @@ export const authStore = create<AuthState>((set, get) => ({
   // ─── Complete Onboarding ────────────────────────────────
   // Sets name, sport, experience level, and marks onboarded_at.
 
-  completeOnboarding: async ({ name }) => {
-    await get().updateProfile({
-      name,
-    });
+  completeOnboarding: async (data: UserProfileUpdate) => {
+    await get().updateProfile(data);
   },
 
   clearError: () => set({ error: null }),

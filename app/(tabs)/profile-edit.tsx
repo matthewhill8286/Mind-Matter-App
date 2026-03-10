@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, TextInput, ScrollView, StyleSheet, Platform } from 'react-native';
 import { router } from 'expo-router';
-import { useProfileStore } from '@/store/useProfileStore';
+import { profileStore } from '@/store/profileStore';
 import { showAlert, withLoading } from '@/lib/state';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
@@ -79,7 +79,7 @@ function RadioOption({
 export default function ProfileEdit() {
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
-  const { profile, fetchProfile, saveProfile } = useProfileStore();
+  const { profile, fetchProfile, saveProfile } = profileStore();
   const [loading, setLoading] = useState(true);
 
   const [name, setName] = useState('');

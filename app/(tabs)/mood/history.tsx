@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Platform } from 'react-native';
 import ScreenHeader from '@/components/ScreenHeader';
 import Calendar from '@/components/Calendar';
-import { useMoodStore } from '@/store/useMoodStore';
+import { moodStore } from '@/store/moodStore';
 import { MoodCheckIn } from '@/lib/types';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -32,7 +32,7 @@ export default function MoodHistory() {
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
 
-  const { moodCheckIns: items, fetchMoodCheckIns } = useMoodStore();
+  const { moodCheckIns: items, fetchMoodCheckIns } = moodStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
 

@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import ScreenHeader from '@/components/ScreenHeader';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
-import { useSleepStore } from '@/store/useSleepStore';
+import { sleepStore } from '@/store/sleepStore';
 import { MaterialIcons } from '@expo/vector-icons';
 import { showAlert } from '@/lib/state';
 
@@ -13,7 +13,7 @@ export default function SleepDetailScreen() {
   const router = useRouter();
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
-  const { sleepEntries, deleteSleepEntry } = useSleepStore();
+  const { sleepEntries, deleteSleepEntry } = sleepStore();
 
   const entry = sleepEntries.find((e) => e.id === id);
 
@@ -45,8 +45,9 @@ export default function SleepDetailScreen() {
     );
   }
 
-  const startDate = new Date(entry.startISO);
-  const endDate = new Date(entry.endISO);
+  const startDate = new Date(entry.start_iso ?? '');
+  const endDate = new Date(entry.end_iso ?? '');
+
   const durationHrs = Math.max(
     0,
     (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60),

@@ -8,9 +8,15 @@ import {
   Assessment,
   AssessmentInsert,
 } from '@/lib/types';
-import { syncToSupabase, fetchFromSupabase } from '@/lib/supabase-sync';
-
+import { supabase } from '@/lib/supabase';
+import { authStore } from '@/store/authStore';
 import { createLoadingSlice, LoadingState, SliceCreator } from '@/lib/zustand-helpers';
+
+function getUserIdOrThrow(): string {
+  const { user } = authStore.getState();
+  if (!user) throw new Error('No user session found. Please sign in again.');
+  return user.id;
+}
 
 interface ProfileState {
   profile: UserProfile | null;
@@ -43,12 +49,14 @@ const createProfileSlice: SliceCreator<ProfileState & ProfileActions, LoadingSta
     startLoading('fetchProfile');
     set({ error: null });
     try {
-      const { data: supabaseProfile, error: supabaseError } = await fetchFromSupabase<any>(
-        'profiles',
-        { matchColumn: 'user_id' },
-      );
+      const userId = getUserIdOrThrow();
+      const { data: supabaseProfile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (supabaseError) throw supabaseError;
+      if (error) set({ error: (error as Error).message });
 
       if (supabaseProfile) {
         set({ profile: supabaseProfile as UserProfile });
@@ -60,17 +68,19 @@ const createProfileSlice: SliceCreator<ProfileState & ProfileActions, LoadingSta
     }
   },
 
-  saveProfile: async (profile: UserProfile) => {
+  saveProfile: async (profile: UserProfileInsert) => {
     const { startLoading, stopLoading } = api.getState();
     startLoading('saveProfile');
     set({ error: null });
     try {
-      const { data: result, error } = await syncToSupabase('profiles', profile, {
-        matchColumn: 'user_id',
-        onConflict: 'user_id',
-      });
+      const userId = getUserIdOrThrow();
+      const { data: result, error } = await supabase
+        .from('profiles')
+        .upsert({ ...profile, user_id: userId }, { onConflict: 'user_id' })
+        .select()
+        .single();
 
-      if (error) throw new Error(typeof error === 'string' ? error : (error as any).message);
+      if (error) set({ error: (error as Error).message });
 
       if (result) {
         set({ profile: result as UserProfile });
@@ -90,10 +100,12 @@ const createProfileSlice: SliceCreator<ProfileState & ProfileActions, LoadingSta
       const currentProfile = get().profile || ({} as UserProfile);
       const merged = { ...currentProfile, ...updates, updated_at: new Date().toISOString() };
 
-      const { data: result, error } = await syncToSupabase('profiles', merged, {
-        matchColumn: 'user_id',
-        onConflict: 'user_id',
-      });
+      const userId = getUserIdOrThrow();
+      const { data: result, error } = await supabase
+        .from('profiles')
+        .upsert({ ...merged, user_id: userId }, { onConflict: 'user_id' })
+        .select()
+        .single();
 
       if (error) throw new Error(typeof error === 'string' ? error : (error as any).message);
 
@@ -112,10 +124,12 @@ const createProfileSlice: SliceCreator<ProfileState & ProfileActions, LoadingSta
     startLoading('fetchAssessment');
     set({ error: null });
     try {
-      const { data: supabaseAssessment, error: supabaseError } = await fetchFromSupabase<any>(
-        'assessments',
-        { matchColumn: 'user_id' },
-      );
+      const userId = getUserIdOrThrow();
+      const { data: supabaseAssessment, error: supabaseError } = await supabase
+        .from('assessments')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
       if (supabaseError) throw supabaseError;
 
@@ -134,10 +148,12 @@ const createProfileSlice: SliceCreator<ProfileState & ProfileActions, LoadingSta
     startLoading('saveAssessment');
     set({ error: null });
     try {
-      const { data: result, error } = await syncToSupabase('assessments', assessment, {
-        matchColumn: 'user_id',
-        onConflict: 'user_id',
-      });
+      const userId = getUserIdOrThrow();
+      const { data: result, error } = await supabase
+        .from('assessments')
+        .upsert({ ...assessment, user_id: userId }, { onConflict: 'user_id' })
+        .select()
+        .single();
 
       if (error) throw new Error(typeof error === 'string' ? error : (error as any).message);
 
@@ -154,7 +170,7 @@ const createProfileSlice: SliceCreator<ProfileState & ProfileActions, LoadingSta
   clearProfile: () => set({ profile: null, assessment: null }),
 });
 
-export const useProfileStore = create<ProfileStore>()(
+export const profileStore = create<ProfileStore>()(
   persist(
     (set, get, api) => ({
       ...createProfileSlice(set, get, api),

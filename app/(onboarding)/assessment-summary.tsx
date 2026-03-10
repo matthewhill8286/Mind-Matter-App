@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import ScoreCard from '@/components/ScoreCard';
-import { useProfileStore } from '@/store/useProfileStore';
+import { profileStore } from '@/store/profileStore';
 
 export default function AssessmentSummary() {
-  const { assessment: a, fetchAssessment } = useProfileStore();
+  const { assessment: a, fetchAssessment } = profileStore();
 
   useEffect(() => {
     if (!a) {
@@ -13,8 +13,8 @@ export default function AssessmentSummary() {
     }
   }, [a, fetchAssessment]);
 
-  const sleep = typeof a?.sleepQuality === 'number' ? a.sleepQuality : null;
-  const stress = typeof a?.stressLevel === 'number' ? a.stressLevel : null;
+  const sleep = typeof a?.sleep_quality === 'number' ? a.sleep_quality : null;
+  const stress = typeof a?.stress_level === 'number' ? a.stress_level : null;
 
   return (
     <View style={{ flex: 1, backgroundColor: '#6f6660', padding: 24, paddingTop: 60 }}>
@@ -101,10 +101,10 @@ export default function AssessmentSummary() {
               />
             )}
 
-            {a?.soundCheck &&
-            typeof a.soundCheck === 'object' &&
-            'metrics' in a.soundCheck &&
-            (a.soundCheck as any).metrics ? (
+            {a?.sound_check &&
+            typeof a.sound_check === 'object' &&
+            'metrics' in a.sound_check &&
+            (a.sound_check as any).metrics ? (
               <View
                 style={{
                   marginTop: 8,
@@ -115,7 +115,7 @@ export default function AssessmentSummary() {
               >
                 <Text style={{ fontWeight: '900', color: '#6a5e55' }}>Voice Analysis</Text>
                 <Text style={{ opacity: 0.7, color: '#6a5e55', fontSize: 14, marginTop: 4 }}>
-                  {(a.soundCheck as any).metrics.wpm} words per minute detected.
+                  {(a.sound_check as any).metrics.wpm} words per minute detected.
                 </Text>
               </View>
             ) : null}

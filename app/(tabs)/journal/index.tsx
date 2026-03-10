@@ -5,7 +5,7 @@ import ScreenHeader from '@/components/ScreenHeader';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
-import { useJournalStore } from '@/store/useJournalStore';
+import { journalStore } from '@/store/journalStore';
 import { SkeletonRect } from '@/components/Skeleton';
 import { ActionCard } from '@/components/ActionCard';
 import { GridItem } from '@/components/GridItem';
@@ -16,7 +16,7 @@ export default function JournalHub() {
   const router = useRouter();
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
-  const { journalEntries: entries, fetchJournalEntries, isLoading: loading } = useJournalStore();
+  const { journalEntries: entries, fetchJournalEntries, isLoading: loading } = journalStore();
 
   React.useEffect(() => {
     (async () => {

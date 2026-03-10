@@ -3,9 +3,15 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { StressKit, StressKitInsert } from '@/lib/types';
 import { DEFAULT_KIT } from '@/lib/types';
-import { syncToSupabase, fetchFromSupabase } from '@/lib/supabase-sync';
-
+import { supabase } from '@/lib/supabase';
+import { authStore } from '@/store/authStore';
 import { createLoadingSlice, LoadingState, SliceCreator } from '@/lib/zustand-helpers';
+
+function getUserIdOrThrow(): string {
+  const { user } = authStore.getState();
+  if (!user) throw new Error('No user session found. Please sign in again.');
+  return user.id;
+}
 
 interface StressState {
   stressKit: StressKit | null;
@@ -36,9 +42,12 @@ const createStressSlice: SliceCreator<StressState & StressActions, LoadingState>
     set({ error: null });
     try {
       // Refresh from Supabase
-      const { data: supabaseKit, error } = await fetchFromSupabase<any>('stress_kits', {
-        matchColumn: 'user_id',
-      });
+      const userId = getUserIdOrThrow();
+      const { data: supabaseKit, error } = await supabase
+        .from('stress_kits')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
       if (error) throw error;
 
@@ -63,10 +72,12 @@ const createStressSlice: SliceCreator<StressState & StressActions, LoadingState>
     set({ error: null });
     try {
       // Sync to Supabase
-      const { data: result, error } = await syncToSupabase('stress_kits', kit, {
-        matchColumn: 'user_id',
-        onConflict: 'user_id',
-      });
+      const userId = getUserIdOrThrow();
+      const { data: result, error } = await supabase
+        .from('stress_kits')
+        .upsert({ ...kit, user_id: userId }, { onConflict: 'user_id' })
+        .select()
+        .single();
 
       if (error) throw new Error(typeof error === 'string' ? error : (error as any).message);
 
@@ -83,7 +94,7 @@ const createStressSlice: SliceCreator<StressState & StressActions, LoadingState>
   clearStress: () => set({ stressKit: null }),
 });
 
-export const useStressStore = create<StressStore>()(
+export const stressStore = create<StressStore>()(
   persist(
     (set, get, api) => ({
       ...createStressSlice(set, get, api),

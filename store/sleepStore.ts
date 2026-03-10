@@ -2,9 +2,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SleepEntry, SleepEntryInsert } from '@/lib/types';
-import { syncToSupabase, getUserIdOrThrow } from '@/lib/supabase-sync';
 import { createLoadingSlice, LoadingState, SliceCreator } from '@/lib/zustand-helpers';
 import { supabase } from '@/lib/supabase';
+import { authStore } from '@/store/authStore';
+
+function getUserIdOrThrow(): string {
+  const { user } = authStore.getState();
+  if (!user) throw new Error('No user session found. Please sign in again.');
+  return user.id;
+}
 
 interface SleepModeState {
   sleepModeStartISO: string | null;
@@ -67,7 +73,12 @@ const createSleepSlice: SliceCreator<SleepState & SleepActions, LoadingState> = 
 
   addSleepEntry: async (input) => {
     const { id: _id, created_at: _created_atISO, ...body } = input;
-    const { data: result, error } = await syncToSupabase('sleep', body, { matchColumn: 'id' });
+    const userId = getUserIdOrThrow();
+    const { data: result, error } = await supabase
+      .from('sleep')
+      .upsert({ ...body, user_id: userId }, { onConflict: 'id' })
+      .select()
+      .single();
 
     console.log('error type', { error });
     console.log('error message', {
@@ -111,7 +122,7 @@ const createSleepSlice: SliceCreator<SleepState & SleepActions, LoadingState> = 
     }),
 });
 
-export const useSleepStore = create<SleepStore>()(
+export const sleepStore = create<SleepStore>()(
   persist(
     (set, get, api) => ({
       ...createSleepSlice(set, get, api),

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { router } from 'expo-router';
-import { useProfileStore } from '@/store/useProfileStore';
+import { profileStore } from '@/store/profileStore';
 import ScoreCard from '@/components/ScoreCard';
 
 export default function ProfileOverview() {
-  const { profile, fetchProfile } = useProfileStore();
+  const { profile, fetchProfile } = profileStore();
 
   useEffect(() => {
     fetchProfile();

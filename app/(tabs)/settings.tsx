@@ -7,13 +7,13 @@ import { showAlert, withLoading } from '@/lib/state';
 
 import { Colors, UI } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useProfileStore } from '@/store/useProfileStore';
+import { profileStore } from '@/store/profileStore';
 import { SkeletonRect } from '@/components/Skeleton';
 
 export default function Settings() {
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
-  const { profile, fetchProfile, updateProfile } = useProfileStore();
+  const { profile, fetchProfile, updateProfile } = profileStore();
   const [loading, setLoading] = useState(true);
 
   const [selected, setSelected] = useState<Set<IssueKey>>(new Set());
@@ -27,8 +27,8 @@ export default function Settings() {
   }, []);
 
   useEffect(() => {
-    if (profile?.selectedIssues) {
-      setSelected(new Set(profile.selectedIssues as IssueKey[]));
+    if (profile?.selected_issues) {
+      setSelected(new Set(profile.selected_issues as IssueKey[]));
     }
   }, [profile]);
 
@@ -41,7 +41,7 @@ export default function Settings() {
     }
     await withLoading('save-profile', async () => {
       await updateProfile({
-        selectedIssues: selectedArray,
+        selected_issues: selectedArray,
       });
       showAlert('Saved', 'Your preferences were updated.');
       router.back();

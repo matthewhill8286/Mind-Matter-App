@@ -7,7 +7,7 @@ import { STRESS_VIDEOS } from '@/data/stressVideos';
 import { STRESS_QUOTES } from '@/constants/quotes';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import ScreenHeader from '@/components/ScreenHeader';
-import { useStressHistoryStore } from '@/store/useStressHistoryStore';
+import { stressHistoryStore } from '@/store/stressHistoryStore';
 import YoutubePlayer from 'react-native-youtube-iframe';
 
 const { width } = Dimensions.get('window');
@@ -22,7 +22,7 @@ export default function WatchVideoScreen() {
 
   useEffect(() => {
     if (video) {
-      useStressHistoryStore.getState().addStressCompletion(video.id, video.title);
+      stressHistoryStore.getState().addStressCompletion(video.id, video.title);
     }
   }, [video]);
 

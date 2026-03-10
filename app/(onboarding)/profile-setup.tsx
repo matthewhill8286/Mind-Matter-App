@@ -3,7 +3,7 @@ import { View, Text, Pressable, TextInput, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import ProfileProgressRing from '@/components/ProfileProgressRing';
 import Chips from '@/components/Chips';
-import { useProfileStore } from '@/store/useProfileStore';
+import { profileStore } from '@/store/profileStore';
 import { withLoading } from '@/lib/state';
 
 type StepKey = 'intro' | 'name' | 'intention' | 'routine' | 'finish';
@@ -11,7 +11,7 @@ const STEPS: StepKey[] = ['intro', 'name', 'intention', 'routine', 'finish'];
 
 export default function ProfileSetup() {
   const [saving, setSaving] = useState(false);
-  const { saveProfile } = useProfileStore();
+  const { saveProfile } = profileStore();
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');

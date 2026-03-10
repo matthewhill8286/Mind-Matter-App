@@ -5,11 +5,11 @@ import { ISSUES, IssueKey } from '@/data/issues';
 import { suggestWithReasons } from '@/lib/suggestCategories';
 import { MostCommonChips } from '@/components/MostCommonChips';
 import { SkeletonRect } from '@/components/Skeleton';
-import { useProfileStore } from '@/store/useProfileStore';
+import { profileStore } from '@/store/profileStore';
 import { useIsLoading, withLoading } from '@/lib/state';
 
 export default function SuggestedCategories() {
-  const { assessment, fetchAssessment, updateProfile } = useProfileStore();
+  const { assessment, fetchAssessment, updateProfile } = profileStore();
   const [suggested, setSuggested] = useState<{ key: IssueKey; score: number; reasons: string[] }[]>(
     [],
   );
@@ -34,7 +34,7 @@ export default function SuggestedCategories() {
   async function onContinue() {
     await withLoading('save-profile', async () => {
       await updateProfile({
-        selectedIssues: selectedArray,
+        selected_issues: selectedArray,
       });
       router.replace('/(tabs)/home');
     });

@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import ScreenHeader from '@/components/ScreenHeader';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
-import { useStressHistoryStore } from '@/store/useStressHistoryStore';
+import { stressHistoryStore } from '@/store/stressHistoryStore';
 import { BREATHING_EXERCISES } from '@/data/breathingExercises';
 
 type Phase = 'inhale' | 'hold' | 'exhale' | 'hold-after-exhale';
@@ -92,7 +92,7 @@ export default function BreathingExerciseDetail() {
         setCycles((c) => {
           const newCycles = c + 1;
           if (newCycles === 4) {
-            useStressHistoryStore.getState().addStressCompletion(exercise.id, exercise.title);
+            stressHistoryStore.getState().addStressCompletion(exercise.id, exercise.title);
           }
           return newCycles;
         });

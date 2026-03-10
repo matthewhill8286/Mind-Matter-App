@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ScreenHeader from '@/components/ScreenHeader';
 import Chips from '@/components/Chips';
 import MoodChart from '@/components/MoodChart';
-import { useMoodStore } from '@/store/useMoodStore';
+import { moodStore } from '@/store/moodStore';
 import { MoodCheckIn } from '@/lib/types';
 import { showAlert, withLoading } from '@/lib/state';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -55,7 +55,7 @@ export default function Mood() {
     fetchMoodCheckIns,
     addMoodCheckIn,
     isLoading: loading,
-  } = useMoodStore();
+  } = moodStore();
 
   useEffect(() => {
     (async () => {

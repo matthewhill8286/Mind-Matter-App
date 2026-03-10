@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import ScreenHeader from '@/components/ScreenHeader';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
-import { useMoodStore } from '@/store/useMoodStore';
+import { moodStore } from '@/store/moodStore';
 import { MaterialIcons } from '@expo/vector-icons';
 import { showAlert } from '@/lib/state';
 
@@ -13,7 +13,7 @@ export default function MoodDetailScreen() {
   const router = useRouter();
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
-  const { moodCheckIns, deleteMoodCheckIn } = useMoodStore();
+  const { moodCheckIns, deleteMoodCheckIn } = moodStore();
 
   const entry = moodCheckIns.find((e) => e.id === id);
 

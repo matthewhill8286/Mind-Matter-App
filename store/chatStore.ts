@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ChatMessage, ChatHistory, ChatHistoryInsert } from '@/lib/types';
-import { syncToSupabase, fetchFromSupabase, getUserIdOrThrow } from '@/lib/supabase-sync';
+import { ChatMessage } from '@/lib/types';
 import { createLoadingSlice, LoadingState, SliceCreator } from '@/lib/zustand-helpers';
 import { supabase } from '@/lib/supabase';
 
@@ -40,13 +39,14 @@ const createChatSlice: SliceCreator<ChatState & ChatActions, LoadingState> = (se
     if (!user) {
       console.error('User not authenticated');
       set({ error: 'User not authenticated' });
+      return;
     }
 
     try {
       const { data, error } = await supabase
         .from('chat_histories')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .eq('issue_key', issueKey)
         .maybeSingle();
 
@@ -78,13 +78,14 @@ const createChatSlice: SliceCreator<ChatState & ChatActions, LoadingState> = (se
     if (!user) {
       console.error('User not authenticated');
       set({ error: 'User not authenticated' });
+      return;
     }
 
     try {
       const { data, error } = await supabase
         .from('chat_histories')
         .select('*')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) set({ error: error.message });
 
@@ -117,12 +118,17 @@ const createChatSlice: SliceCreator<ChatState & ChatActions, LoadingState> = (se
     if (!user) {
       console.error('User not authenticated');
       set({ error: 'User not authenticated' });
+      return;
     }
 
     try {
       const { error } = await supabase
         .from('chat_histories')
-        .upsert({ updatedMessages, user_id: user?.id })
+        .upsert({
+          messages: updatedMessages,
+          issue_key: issueKey,
+          user_id: user.id,
+        })
         .select()
         .single();
 
@@ -144,6 +150,7 @@ const createChatSlice: SliceCreator<ChatState & ChatActions, LoadingState> = (se
     if (!user) {
       console.error('User not authenticated');
       set({ error: 'User not authenticated' });
+      return;
     }
 
     try {

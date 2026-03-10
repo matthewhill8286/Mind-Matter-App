@@ -2,9 +2,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { JournalEntry, JournalEntryInsert } from '@/lib/types';
-import { syncToSupabase, getUserIdOrThrow } from '@/lib/supabase-sync';
 import { createLoadingSlice, LoadingState, SliceCreator } from '@/lib/zustand-helpers';
 import { supabase } from '@/lib/supabase';
+import { authStore } from '@/store/authStore';
+
+function getUserIdOrThrow(): string {
+  const { user } = authStore.getState();
+  if (!user) throw new Error('No user session found. Please sign in again.');
+  return user.id;
+}
 
 interface JournalState {
   journalEntries: JournalEntry[];
@@ -36,15 +42,15 @@ const createJournalSlice: SliceCreator<JournalState & JournalActions, LoadingSta
     try {
       const userId = getUserIdOrThrow();
       const { data, error } = await supabase
-        .from('journals')
+        .from('journal_entries')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) set({ error: (error as Error).message });
+
       const items = (data || []).map((item: any) => ({
         ...item,
-
         created_at: item.created_at || item.created_at,
       }));
       set({ journalEntries: items });
@@ -56,10 +62,15 @@ const createJournalSlice: SliceCreator<JournalState & JournalActions, LoadingSta
   },
 
   createJournalEntry: async (input) => {
-    const { id: _id, created_at: _created_at, updated_at: _updated_at, ...body } = input;
-    const { data: result, error } = await syncToSupabase('journals', body, { matchColumn: 'id' });
+    const { id: _id, created_at: _created_at, ...body } = input;
+    const userId = getUserIdOrThrow();
+    const { data: result, error } = await supabase
+      .from('journal_entries')
+      .upsert({ ...body, user_id: userId }, { onConflict: 'id' })
+      .select()
+      .single();
 
-    if (error) throw new Error(typeof error === 'string' ? error : (error as any).message);
+    if (error) set({ error: (error as Error).message });
 
     const entry = {
       ...result,
@@ -70,15 +81,15 @@ const createJournalSlice: SliceCreator<JournalState & JournalActions, LoadingSta
   },
 
   upsertJournalEntry: async (entry) => {
-    const { id, created_at: _c, updated_at: _u, ...body } = entry;
-    const { data: result, error } = await syncToSupabase(
-      'journals',
-      { id, ...body },
-      { matchColumn: 'id' },
-    );
+    const { id, created_at: _c, ...body } = entry;
+    const userId = getUserIdOrThrow();
+    const { data: result, error } = await supabase
+      .from('journal_entries')
+      .upsert({ id, ...body, user_id: userId }, { onConflict: 'id' })
+      .select()
+      .single();
 
-    if (error) throw new Error(typeof error === 'string' ? error : (error as any).message);
-
+    if (error) set({ error: (error as Error).message });
     const item = {
       ...result,
     } as JournalEntry;
@@ -98,8 +109,14 @@ const createJournalSlice: SliceCreator<JournalState & JournalActions, LoadingSta
   deleteJournalEntry: async (id) => {
     try {
       const userId = getUserIdOrThrow();
-      const { error } = await supabase.from('journals').delete().eq('user_id', userId).eq('id', id);
-      if (error) throw error;
+      const { error } = await supabase
+        .from('journal_entries')
+        .delete()
+        .eq('user_id', userId)
+        .eq('id', id);
+
+      if (error) set({ error: (error as Error).message });
+
       set((state) => ({
         journalEntries: state.journalEntries.filter((e) => e.id !== id),
       }));
@@ -111,7 +128,7 @@ const createJournalSlice: SliceCreator<JournalState & JournalActions, LoadingSta
   clearJournal: () => set({ journalEntries: [] }),
 });
 
-export const useJournalStore = create<JournalStore>()(
+export const journalStore = create<JournalStore>()(
   persist(
     (set, get, api) => ({
       ...createJournalSlice(set, get, api),

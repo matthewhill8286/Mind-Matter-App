@@ -143,18 +143,18 @@ function useMoodInsights() {
     queryKey: ['mood-insights', profile!.user_id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('moods')
-        .select('created_at, mood, energy, stress, sport_context')
+        .from('mood_logs')
+        .select('logged_at, mood_score, energy_score, stress_score, sport_context')
         .eq('user_id', profile!.user_id)
-        .gte('created_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
-        .order('created_at', { ascending: true });
+        .gte('logged_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+        .order('logged_at', { ascending: true });
 
       if (error) throw error;
       return (data || []).map((d) => ({
-        logged_at: d.created_at,
-        mood_score: Number(d.mood) || 0,
-        energy_score: d.energy || 0,
-        stress_score: d.stress || 0,
+        logged_at: d.logged_at,
+        mood_score: d.mood_score || 0,
+        energy_score: d.energy_score || 0,
+        stress_score: d.stress_score || 0,
         sport_context: d.sport_context,
       }));
     },

@@ -4,19 +4,19 @@ import ScreenHeader from '@/components/ScreenHeader';
 import { router } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useProfileStore } from '@/store/useProfileStore';
+import { profileStore } from '@/store/profileStore';
 import { Colors, UI } from '@/constants/theme';
 import { IconSymbol } from '@/components/icon-symbol';
 import { SkeletonRect } from '@/components/Skeleton';
 import { useTranslation } from 'react-i18next';
 import { authStore } from '@/store/authStore';
 
-import { useMoodStore } from '@/store/useMoodStore';
-import { useJournalStore } from '@/store/useJournalStore';
-import { useSleepStore } from '@/store/useSleepStore';
-import { useMindfulnessStore } from '@/store/useMindfulnessStore';
-import { useStressHistoryStore } from '@/store/useStressHistoryStore';
-import { useStressStore } from '@/store/useStressStore';
+import { moodStore } from '@/store/moodStore';
+import { journalStore } from '@/store/journalStore';
+import { sleepStore } from '@/store/sleepStore';
+import { mindfulnessStore } from '@/store/mindfulnessStore';
+import { stressHistoryStore } from '@/store/stressHistoryStore';
+import { stressStore } from '@/store/stressStore';
 import { chatStore } from '@/store/chatStore';
 import { ActionCard } from '@/components/ActionCard';
 
@@ -24,7 +24,7 @@ export default function Profile() {
   const { t } = useTranslation();
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
-  const { profile, fetchProfile } = useProfileStore();
+  const { profile, fetchProfile } = profileStore();
   const { user, signOut: authSignOut } = authStore();
   const [loading, setLoading] = useState(true);
   const { subscription, isExpired, isLifetime } = useSubscription();
@@ -39,13 +39,13 @@ export default function Profile() {
   }, [fetchProfile]);
 
   async function handleSignOut() {
-    useProfileStore.getState().clearProfile();
-    useMoodStore.getState().clearMood();
-    useJournalStore.getState().clearJournal();
-    useSleepStore.getState().clearSleep();
-    useMindfulnessStore.getState().clearMindfulness();
-    useStressHistoryStore.getState().clearStressHistory();
-    useStressStore.getState().clearStress();
+    profileStore.getState().clearProfile();
+    moodStore.getState().clearMood();
+    journalStore.getState().clearJournal();
+    sleepStore.getState().clearSleep();
+    mindfulnessStore.getState().clearMindfulness();
+    stressHistoryStore.getState().clearStressHistory();
+    stressStore.getState().clearStress();
     chatStore.getState().clearAllChat();
     await authSignOut();
   }

@@ -4,7 +4,7 @@ import ScreenHeader from '@/components/ScreenHeader';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
-import { useSleepStore } from '@/store/useSleepStore';
+import { sleepStore } from '@/store/sleepStore';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function SleepHistoryScreen() {
@@ -12,7 +12,7 @@ export default function SleepHistoryScreen() {
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
 
-  const { sleepEntries: entries, fetchSleepEntries, isLoading: loading } = useSleepStore();
+  const { sleepEntries: entries, fetchSleepEntries, isLoading: loading } = sleepStore();
 
   React.useEffect(() => {
     fetchSleepEntries();
@@ -49,7 +49,7 @@ export default function SleepHistoryScreen() {
             >
               <View style={styles.entryHeader}>
                 <Text style={[styles.entryDate, { color: colors.text }]}>
-                  {new Date(entry.startISO).toLocaleString()}
+                  {new Date(entry.start_iso).toLocaleString()}
                 </Text>
                 <View style={styles.qualityBadge}>
                   <MaterialIcons
@@ -65,7 +65,7 @@ export default function SleepHistoryScreen() {
               <Text style={[styles.entryDuration, { color: colors.mutedText }]}>
                 {Math.max(
                   0,
-                  (new Date(entry.endISO).getTime() - new Date(entry.startISO).getTime()) /
+                  (new Date(entry.end_iso).getTime() - new Date(entry.start_iso).getTime()) /
                     (1000 * 60 * 60),
                 ).toFixed(1)}{' '}
                 hours of sleep

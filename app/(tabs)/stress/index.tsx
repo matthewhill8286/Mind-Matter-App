@@ -6,8 +6,8 @@ import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Colors, UI } from '@/constants/theme';
-import { useStressStore } from '@/store/useStressStore';
-import { useStressHistoryStore } from '@/store/useStressHistoryStore';
+import { stressStore } from '@/store/stressStore';
+import { stressHistoryStore } from '@/store/stressHistoryStore';
 import { showAlert } from '@/lib/state';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { SkeletonRect } from '@/components/Skeleton';
@@ -24,8 +24,8 @@ export default function StressHub() {
   const { hasFullAccess } = useSubscription();
   const colors = Colors[theme];
 
-  const { stressKit: kit, fetchStressKit, isLoading: kitLoading } = useStressStore();
-  const { stressHistory, fetchStressHistory, isLoading: historyLoading } = useStressHistoryStore();
+  const { stressKit: kit, fetchStressKit, isLoading: kitLoading } = stressStore();
+  const { stressHistory, fetchStressHistory, isLoading: historyLoading } = stressHistoryStore();
 
   const loading = kitLoading || historyLoading;
 
@@ -61,15 +61,15 @@ export default function StressHub() {
             <ActionCard
               title={
                 kit &&
-                (kit.triggers.length > 0 || kit.helpfulActions.length > 0 || kit.people.length > 0)
+                (kit.triggers.length > 0 || kit.helpful_actions.length > 0 || kit.people.length > 0)
                   ? t('stress.yourStressKit')
-                  : t('stress.quickPhrase')
+                  : t('stress.quick_phrase')
               }
               icon="psychology"
             >
               {kit &&
               (kit?.triggers.length > 0 ||
-                kit?.helpfulActions.length > 0 ||
+                kit?.helpful_actions.length > 0 ||
                 kit?.people.length > 0) ? (
                 <View style={{ gap: 12, marginBottom: 20 }}>
                   <Text
@@ -78,10 +78,10 @@ export default function StressHub() {
                       { color: colors.mutedText, fontStyle: 'italic', marginBottom: 0 },
                     ]}
                   >
-                    &quot;{kit?.quickPhrase || t('stress.defaultQuickPhrase')}&quot;
+                    &quot;{kit?.quick_phrase || t('stress.defaultQuickPhrase')}&quot;
                   </Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    {kit.helpfulActions.slice(0, 3).map((action, idx) => (
+                    {kit.helpful_actions.slice(0, 3).map((action, idx) => (
                       <View
                         key={idx}
                         style={{
@@ -99,9 +99,9 @@ export default function StressHub() {
                         </Text>
                       </View>
                     ))}
-                    {kit.helpfulActions.length > 3 && (
+                    {kit.helpful_actions.length > 3 && (
                       <Text style={{ color: colors.mutedText, fontSize: 12 }}>
-                        {t('common.more', { count: kit.helpfulActions.length - 3 })}
+                        {t('common.more', { count: kit.helpful_actions.length - 3 })}
                       </Text>
                     )}
                   </View>
@@ -110,7 +110,7 @@ export default function StressHub() {
                 <Text
                   style={[styles.cardDescription, { color: colors.mutedText, fontStyle: 'italic' }]}
                 >
-                  &quot;{kit?.quickPhrase || t('stress.defaultQuickPhrase')}&quot;
+                  &quot;{kit?.quick_phrase || t('stress.defaultQuickPhrase')}&quot;
                 </Text>
               )}
 
@@ -136,7 +136,7 @@ export default function StressHub() {
                 <Text style={styles.modeButtonText}>
                   {kit &&
                   (kit.triggers.length > 0 ||
-                    kit.helpfulActions.length > 0 ||
+                    kit.helpful_actions.length > 0 ||
                     kit.people.length > 0)
                     ? t('stress.viewFullPlan')
                     : t('stress.manageStressPlan')}

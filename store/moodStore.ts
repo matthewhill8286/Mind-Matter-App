@@ -2,9 +2,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MoodCheckIn, MoodCheckInInsert } from '@/lib/types';
-import { getUserIdOrThrow, syncToSupabase } from '@/lib/supabase-sync';
 import { createLoadingSlice, LoadingState, SliceCreator } from '@/lib/zustand-helpers';
 import { supabase } from '@/lib/supabase';
+import { authStore } from '@/store/authStore';
+
+function getUserIdOrThrow(): string {
+  const { user } = authStore.getState();
+  if (!user) throw new Error('No user session found. Please sign in again.');
+  return user.id;
+}
 
 interface MoodState {
   moodCheckIns: MoodCheckIn[];
@@ -31,18 +37,17 @@ const createMoodSlice: SliceCreator<MoodState & MoodActions, LoadingState> = (se
     try {
       const userId = getUserIdOrThrow();
       const { data, error } = await supabase
-        .from('moods')
+        .from('mood_logs')
         .select('*')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+        .order('logged_at', { ascending: false });
 
       if (error) throw error;
 
-      console.log('data from moods supabase:', data);
+      console.log('data from mood_logs supabase:', data);
 
       const items = (data ?? []).map((item: any) => ({
         ...item,
-        created_at: item.created_at || item.created_at,
       }));
       set({ moodCheckIns: items });
     } catch (err) {
@@ -53,8 +58,13 @@ const createMoodSlice: SliceCreator<MoodState & MoodActions, LoadingState> = (se
   },
 
   addMoodCheckIn: async (input) => {
-    const { id: _id, created_at: _created_at, ...body } = input;
-    const { data: result, error } = await syncToSupabase('moods', body, { matchColumn: 'id' });
+    const { id: _id, logged_at: _logged_at, ...body } = input;
+    const userId = getUserIdOrThrow();
+    const { data: result, error } = await supabase
+      .from('mood_logs')
+      .upsert({ ...body, user_id: userId }, { onConflict: 'id' })
+      .select()
+      .single();
 
     if (error) throw new Error(typeof error === 'string' ? error : (error as any).message);
 
@@ -69,7 +79,11 @@ const createMoodSlice: SliceCreator<MoodState & MoodActions, LoadingState> = (se
   deleteMoodCheckIn: async (id) => {
     try {
       const userId = getUserIdOrThrow();
-      const { error } = await supabase.from('moods').delete().eq('user_id', userId).eq('id', id);
+      const { error } = await supabase
+        .from('mood_logs')
+        .delete()
+        .eq('user_id', userId)
+        .eq('id', id);
       if (error) throw error;
       set((state) => ({
         moodCheckIns: state.moodCheckIns.filter((i) => i.id !== id),
@@ -82,7 +96,7 @@ const createMoodSlice: SliceCreator<MoodState & MoodActions, LoadingState> = (se
   clearMood: () => set({ moodCheckIns: [] }),
 });
 
-export const useMoodStore = create<MoodStore>()(
+export const moodStore = create<MoodStore>()(
   persist(
     (set, get, api) => ({
       ...createMoodSlice(set, get, api),

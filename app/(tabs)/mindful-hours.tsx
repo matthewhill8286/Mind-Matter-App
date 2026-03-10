@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import ScreenHeader from '@/components/ScreenHeader';
 import { router } from 'expo-router';
-import { useMindfulnessStore } from '@/store/useMindfulnessStore';
+import { mindfulnessStore } from '@/store/mindfulnessStore';
 import { showAlert, withLoading } from '@/lib/state';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
@@ -35,7 +35,7 @@ export default function MindfulHours() {
     fetchMindfulnessHistory,
     addMindfulMinutes,
     isLoading: loading,
-  } = useMindfulnessStore();
+  } = mindfulnessStore();
 
   useEffect(() => {
     (async () => {

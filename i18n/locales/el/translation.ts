@@ -261,7 +261,7 @@ export default {
   stress: {
     hubSubtitle: 'Γρήγορα εργαλεία για να ηρεμήσετε το σώμα σας και να καθαρίσετε το μυαλό σας.',
     yourStressKit: 'Το Κιτ Άγχους σας',
-    quickPhrase: 'Γρήγορη Φράση',
+    quick_phrase: 'Γρήγορη Φράση',
     defaultQuickPhrase: 'Πάρτε μια βαθιά ανάσα. Θα περάσει κι αυτό.',
     upgradeToUnlockPlan: 'Αναβαθμίστε σε ισόβια πρόσβαση για να ξεκλειδώσετε το σχέδιο άγχους σας.',
     upgradeToUnlockGrounding:

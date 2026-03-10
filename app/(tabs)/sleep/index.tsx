@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
 import { showAlert } from '@/lib/state';
-import { useSleepStore } from '@/store/useSleepStore';
+import { sleepStore } from '@/store/sleepStore';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SkeletonRect } from '@/components/Skeleton';
 import { getQualityLabel } from '@/lib/sleep-utils';
@@ -25,7 +25,7 @@ export default function SleepScreen() {
     sleepEntries: entries,
     fetchSleepEntries,
     isLoading: loading,
-  } = useSleepStore();
+  } = sleepStore();
 
   const { sleepModeStartISO } = sleepMode;
 

@@ -1,14 +1,24 @@
+import { MoodLog } from '@/types/alias';
+import { calculateMoodTrend, calculateStreak, detectMoodDecline } from './mood-analysis';
+
 export function calculateWellnessScore(data: any) {
   if (!data) {
     return {
       score: 0,
       breakdown: { mood: 0, sleep: 0, stress: 0, mindfulness: 0, consistency: 0 },
+      streak: 0,
+      trend: 'stable',
+      decline: false,
     };
   }
-  const moodCheckIns = data.moodCheckIns || [];
+  const moodCheckIns: MoodLog[] = data.moodCheckIns || [];
   const journalEntries = data.journalEntries || [];
   const mindfulnessHistory = data.mindfulnessHistory || [];
   const sleepEntries = data.sleepEntries || [];
+
+  const streak = calculateStreak(moodCheckIns);
+  const { trend } = calculateMoodTrend(moodCheckIns);
+  const { declined } = detectMoodDecline(moodCheckIns);
 
   const moodScore = moodCheckIns.length > 0 ? 85 : 0;
   const sleepScore = sleepEntries.length > 0 ? 75 : 0;
@@ -22,6 +32,9 @@ export function calculateWellnessScore(data: any) {
     stress: stressScore,
     mindfulness: mindfulnessScore,
     consistency: consistencyScore,
+    streak,
+    trend,
+    declined,
   });
 
   const total = Math.min(
@@ -38,5 +51,8 @@ export function calculateWellnessScore(data: any) {
       mindfulness: mindfulnessScore,
       consistency: consistencyScore,
     },
+    streak,
+    trend,
+    decline: declined,
   };
 }

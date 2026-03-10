@@ -5,7 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Colors, UI } from '@/constants/theme';
-import { useSleepStore } from '@/store/useSleepStore';
+import { sleepStore } from '@/store/sleepStore';
 import { showAlert, withLoading } from '@/lib/state';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -15,7 +15,7 @@ export default function LogSleepScreen() {
   const theme = useColorScheme() ?? 'light';
   const colors = Colors[theme];
   const { hasFullAccess } = useSubscription();
-  const { addSleepEntry } = useSleepStore();
+  const { addSleepEntry } = sleepStore();
 
   const [quality, setQuality] = useState(3);
   const [duration, setDuration] = useState((params.duration as string) || '8');
@@ -36,8 +36,8 @@ export default function LogSleepScreen() {
       const end = new Date();
       const start = new Date(end.getTime() - hours * 60 * 60 * 1000);
       await addSleepEntry({
-        startISO: start.toISOString(),
-        endISO: end.toISOString(),
+        start_iso: start.toISOString(),
+        end_iso: end.toISOString(),
         quality: quality as any,
         duration: hours,
         notes: note || undefined,

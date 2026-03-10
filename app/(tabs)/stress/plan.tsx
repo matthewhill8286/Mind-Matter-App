@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, UI } from '@/constants/theme';
 import { showAlert, withLoading } from '@/lib/state';
-import { useStressStore } from '@/store/useStressStore';
+import { stressStore } from '@/store/stressStore';
 import { IconSymbol } from '@/components/icon-symbol';
 import { DEFAULT_KIT, StressKit } from '@/lib/types';
 
@@ -21,7 +21,7 @@ export default function StressPlan() {
     color: colors.text,
   };
 
-  const { stressKit, fetchStressKit, saveStressKit } = useStressStore();
+  const { stressKit, fetchStressKit, saveStressKit } = stressStore();
   const [draft, setDraft] = useState<StressKit>(DEFAULT_KIT);
 
   useEffect(() => {
@@ -57,9 +57,9 @@ export default function StressPlan() {
 
   async function save() {
     const next = {
-      quickPhrase: draft.quickPhrase?.trim() || '',
+      quick_phrase: draft.quick_phrase?.trim() || '',
       triggers: (draft.triggers || []).filter(Boolean),
-      helpfulActions: (draft.helpfulActions || []).filter(Boolean),
+      helpful_actions: (draft.helpful_actions || []).filter(Boolean),
       people: (draft.people || []).filter(Boolean),
       notes: draft.notes || '',
     };
@@ -99,8 +99,8 @@ export default function StressPlan() {
             Say this to yourself when you feel overwhelmed.
           </Text>
           <TextInput
-            value={draft.quickPhrase ?? ''}
-            onChangeText={(t) => setDraft((p) => ({ ...p, quickPhrase: t }))}
+            value={draft.quick_phrase ?? ''}
+            onChangeText={(t) => setDraft((p) => ({ ...p, quick_phrase: t }))}
             placeholder="e.g., I can handle one small step."
             placeholderTextColor={colors.placeholder}
             style={inputStyle}
@@ -124,14 +124,14 @@ export default function StressPlan() {
         <EditableList
           title="Helpful actions"
           icon="paperplane.fill"
-          items={draft.helpfulActions || []}
+          items={draft.helpful_actions || []}
           inputValue={actionText}
           setInputValue={setActionText}
           onAdd={() => {
-            addItem('helpfulActions', actionText);
+            addItem('helpful_actions', actionText);
             setActionText('');
           }}
-          onRemove={(i) => removeItem('helpfulActions', i)}
+          onRemove={(i) => removeItem('helpful_actions', i)}
           placeholder="Add an action…"
         />
 

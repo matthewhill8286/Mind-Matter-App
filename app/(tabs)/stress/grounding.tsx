@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useStressHistoryStore } from '@/store/useStressHistoryStore';
+import { stressHistoryStore } from '@/store/stressHistoryStore';
 import { Alert, Platform, View, Text, Pressable, ScrollView, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import ScreenHeader from '@/components/ScreenHeader';
@@ -20,7 +20,7 @@ export default function Grounding() {
   const [taste, setTaste] = useState<string>('');
 
   async function done() {
-    await useStressHistoryStore
+    await stressHistoryStore
       .getState()
       .addStressCompletion('grounding-54321', t('grounding.title'));
     Alert.alert(t('common.niceWork'), t('common.groundingSuccess'));

@@ -17,8 +17,8 @@ import { showAlert, withLoading } from '@/lib/state';
 import { MostCommonChips, type Chip as MCChip } from '@/components/MostCommonChips';
 import SoundPulse from '@/components/SoundPulse';
 import { useRecorder, usePlayer, computeVoiceMetrics } from '@/lib/recorder';
-import { Assessment, MoodCheckIn } from '@/lib/types';
-import { useProfileStore } from '@/store/useProfileStore';
+import { Assessment } from '@/lib/types';
+import { profileStore } from '@/store/profileStore';
 import { NumberSelection } from '@/components/NumberSelection';
 
 const TICK_SPACING = 20;
@@ -376,31 +376,31 @@ export default function AssessmentScreen() {
 
   const SOUND_PHRASES = useMemo(() => ['I am here, taking a moment for myself.'], []);
 
-  const [a, setA] = useState<Assessment>({
+  const [assessment, setA] = useState<Assessment>({
     age: '',
-    expressionCheck: null,
+    expression_check: null,
     gender: null,
     goal: null,
     meds: null,
     mood: null,
-    otherSymptoms: null,
-    physicalDistress: null,
-    physicalDistressNotes: null,
-    sleepQuality: 3,
-    soughtHelpBefore: null,
-    soundCheck: null,
-    stressLevel: 5,
-    takingMeds: null,
+    other_symptoms: null,
+    physical_distress: null,
+    physical_distress_notes: null,
+    sleep_quality: 3,
+    sought_help_before: null,
+    sound_check: null,
+    stress_level: 5,
+    taking_meds: null,
     updated_at: '',
     user_id: '',
     created_at: new Date().toISOString(),
     weight: 70,
-    weightUnit: 'kg',
+    weight_unit: 'kg',
   });
 
   // Derive chips from typed mood text: each typed word/phrase becomes a removable chip
   const typedMoodChips = useMemo<MCChip[]>(() => {
-    const text = (a.mood ?? '').trim();
+    const text = (assessment.mood ?? '').trim();
     if (!text) return [];
     // If user uses commas, treat as comma-separated tokens; otherwise split by whitespace
     const useCommas = /,/.test(text);
@@ -416,7 +416,7 @@ export default function AssessmentScreen() {
       }
     }
     return chips;
-  }, [a.mood]);
+  }, [assessment.mood]);
 
   const { startRecording, stopRecording, isRecording } = useRecorder();
   const [recordingFor, setRecordingFor] = useState<null | 'sound' | 'expression'>(null);
@@ -453,13 +453,14 @@ export default function AssessmentScreen() {
   const key = STEPS[step];
 
   const canContinue = useMemo(() => {
-    if (key === 'goal') return Boolean(a.goal?.trim());
-    if (key === 'mood') return Boolean(a.mood?.trim());
-    if (key === 'medsSpecify') return a.takingMeds !== 'Yes' || Boolean(a.meds?.trim());
+    if (key === 'goal') return Boolean(assessment.goal?.trim());
+    if (key === 'mood') return Boolean(assessment.mood?.trim());
+    if (key === 'medsSpecify')
+      return assessment.taking_meds !== 'Yes' || Boolean(assessment.meds?.trim());
     // Allow advancing past audio steps without hard gating here; UX can encourage recording
     // (tests may not perfectly sync recording flags)
     return true;
-  }, [key, a]);
+  }, [key, assessment]);
 
   async function next() {
     if (!canContinue) {
@@ -468,7 +469,7 @@ export default function AssessmentScreen() {
     }
     if (step === STEPS.length - 1) {
       await withLoading('save-assessment', async () => {
-        await useProfileStore.getState().saveAssessment(a);
+        await profileStore.getState().saveAssessment(assessment);
         router.replace('/(onboarding)/assessment-summary');
       });
       return;
@@ -506,7 +507,7 @@ export default function AssessmentScreen() {
       const transcript = draftTranscript.trim() || SOUND_PHRASES[0].replace(',', ''); // fallback to phrase if empty
       const metrics = computeVoiceMetrics(durationMs, transcript);
       if (kind === 'sound') {
-        setA((prev) => ({ ...prev, soundCheck: { uri, durationMs, transcript, metrics } }));
+        setA((prev) => ({ ...prev, sound_check: { uri, durationMs, transcript, metrics } }));
       } else {
         const phrase = EXPRESSION_PHRASE.toLowerCase().replaceAll(/[^a-z\s]/g, '');
         const said = transcript.toLowerCase().replaceAll(/[^a-z\s]/g, '');
@@ -519,7 +520,7 @@ export default function AssessmentScreen() {
         const matchScore = phraseWords.size ? Math.round((hit / phraseWords.size) * 100) : 0;
         setA((prev) => ({
           ...prev,
-          expressionCheck: { uri, durationMs, transcript, metrics, matchScore },
+          expression_check: { uri, durationMs, transcript, metrics, matchScore },
         }));
       }
       setRecordingFor(null); // Clear recordingFor after successful stop
@@ -549,13 +550,13 @@ export default function AssessmentScreen() {
                 <RadioOption
                   key={opt}
                   label={opt}
-                  selected={a.goal === opt}
+                  selected={assessment.goal === opt}
                   onPress={() => setA((p) => ({ ...p, goal: opt }))}
                 />
               ))}
             </View>
             <TextInput
-              value={goalOpts.includes(a.goal ?? '') ? '' : (a.goal ?? '')}
+              value={goalOpts.includes(assessment.goal ?? '') ? '' : (assessment.goal ?? '')}
               onChangeText={(t) => setA((p) => ({ ...p, goal: t }))}
               placeholder={t('assessment.goalPlaceholder')}
               style={styles.input}
@@ -571,7 +572,7 @@ export default function AssessmentScreen() {
                 <RadioOption
                   key={opt.value}
                   label={opt.label}
-                  selected={a.gender === opt.value}
+                  selected={assessment.gender === opt.value}
                   onPress={() => setA((p) => ({ ...p, gender: opt.value }))}
                 />
               ))}
@@ -583,7 +584,10 @@ export default function AssessmentScreen() {
           <>
             <Text style={styles.h1}>{t('assessment.ageTitle')}</Text>
             <View style={{ marginTop: 24 }}>
-              <AgePicker value={a.age ?? '18'} onChange={(v) => setA((p) => ({ ...p, age: v }))} />
+              <AgePicker
+                value={assessment.age ?? '18'}
+                onChange={(v) => setA((p) => ({ ...p, age: v }))}
+              />
             </View>
           </>
         );
@@ -593,14 +597,14 @@ export default function AssessmentScreen() {
             <Text style={styles.h1}>{t('assessment.weightTitle')}</Text>
             <View style={{ marginTop: 24 }}>
               <UnitToggle
-                value={(a.weightUnit as 'lbs' | 'kg') ?? 'kg'}
-                onChange={(v) => setA((p) => ({ ...p, weightUnit: v }))}
+                value={(assessment.weight_unit as 'lbs' | 'kg') ?? 'kg'}
+                onChange={(v) => setA((p) => ({ ...p, weight_unit: v }))}
               />
               <HorizontalRuler
-                min={a.weightUnit === 'lbs' ? 80 : 40}
-                max={a.weightUnit === 'lbs' ? 400 : 200}
-                value={a.weight ?? 70}
-                unit={a.weightUnit ?? 'kg'}
+                min={assessment.weight_unit === 'lbs' ? 80 : 40}
+                max={assessment.weight_unit === 'lbs' ? 400 : 200}
+                value={assessment.weight ?? 70}
+                unit={assessment.weight_unit ?? 'kg'}
                 onChange={(v) => setA((p) => ({ ...p, weight: v }))}
               />
             </View>
@@ -614,7 +618,7 @@ export default function AssessmentScreen() {
               {t('assessment.moodSubtitle', { defaultValue: 'A sentence or two is enough.' })}
             </Text>
             <TextInput
-              value={a.mood ?? ''}
+              value={assessment.mood ?? ''}
               onChangeText={(t) => setA((p) => ({ ...p, mood: t }))}
               placeholder={t('assessment.moodPlaceholder')}
               multiline
@@ -625,7 +629,7 @@ export default function AssessmentScreen() {
                 title={t('assessment.yourWords', { defaultValue: 'Your words:' })}
                 chips={typedMoodChips}
                 onRemove={(chipId) => {
-                  const text = a.mood ?? '';
+                  const text = assessment.mood ?? '';
                   if (!text) return;
                   const token = chipId.toString().toLowerCase();
                   const useCommas = /,/.test(text);
@@ -663,8 +667,8 @@ export default function AssessmentScreen() {
                 <RadioOption
                   key={opt.value}
                   label={opt.label}
-                  selected={a.soughtHelpBefore === opt.value}
-                  onPress={() => setA((p) => ({ ...p, soughtHelpBefore: opt.value }))}
+                  selected={assessment.sought_help_before === opt.value}
+                  onPress={() => setA((p) => ({ ...p, sought_help_before: opt.value }))}
                 />
               ))}
             </View>
@@ -679,14 +683,14 @@ export default function AssessmentScreen() {
                 <RadioOption
                   key={opt.value}
                   label={opt.label}
-                  selected={a.physicalDistress === opt.value}
-                  onPress={() => setA((p) => ({ ...p, physicalDistress: opt.value }))}
+                  selected={assessment.physical_distress === opt.value}
+                  onPress={() => setA((p) => ({ ...p, physical_distress: opt.value }))}
                 />
               ))}
             </View>
             <TextInput
-              value={a.physicalDistressNotes ?? ''}
-              onChangeText={(t) => setA((p) => ({ ...p, physicalDistressNotes: t }))}
+              value={assessment.physical_distress_notes ?? ''}
+              onChangeText={(t) => setA((p) => ({ ...p, physical_distress_notes: t }))}
               placeholder={t('assessment.physicalPlaceholder')}
               style={styles.input}
             />
@@ -702,8 +706,8 @@ export default function AssessmentScreen() {
             <View style={{ marginTop: 24 }}>
               <NumberSelection
                 total={5}
-                value={a.sleepQuality ?? 3}
-                onChange={(v) => setA((p) => ({ ...p, sleepQuality: v as 1 | 2 | 3 | 4 | 5 }))}
+                value={assessment.sleep_quality ?? 3}
+                onChange={(v) => setA((p) => ({ ...p, sleep_quality: v as 1 | 2 | 3 | 4 | 5 }))}
               />
             </View>
           </>
@@ -717,11 +721,11 @@ export default function AssessmentScreen() {
                 <RadioOption
                   key={opt.value}
                   label={opt.label}
-                  selected={a.takingMeds === opt.value}
+                  selected={assessment.taking_meds === opt.value}
                   onPress={() =>
                     setA((p) => ({
                       ...p,
-                      takingMeds: opt.value,
+                      taking_meds: opt.value,
                       meds: opt.value === 'Yes' ? (p.meds ?? '') : null,
                     }))
                   }
@@ -740,7 +744,7 @@ export default function AssessmentScreen() {
               })}
             </Text>
             <TextInput
-              value={a.meds ?? ''}
+              value={assessment.meds ?? ''}
               onChangeText={(t) => setA((p) => ({ ...p, meds: t }))}
               placeholder={t('assessment.medsPlaceholder')}
               style={styles.input}
@@ -755,8 +759,8 @@ export default function AssessmentScreen() {
               {t('assessment.symptomsSubtitle', { defaultValue: 'Anything else you’ve noticed?' })}
             </Text>
             <TextInput
-              value={a.otherSymptoms ?? ''}
-              onChangeText={(t) => setA((p) => ({ ...p, otherSymptoms: t }))}
+              value={assessment.other_symptoms ?? ''}
+              onChangeText={(t) => setA((p) => ({ ...p, other_symptoms: t }))}
               placeholder={t('assessment.symptomsPlaceholder')}
               multiline
               style={[styles.input, { height: 110 }]}
@@ -774,8 +778,8 @@ export default function AssessmentScreen() {
               <HorizontalRuler
                 min={0}
                 max={10}
-                value={a.stressLevel ?? 5}
-                onChange={(v) => setA((p) => ({ ...p, stressLevel: v as MoodCheckIn['stress'] }))}
+                value={assessment.stress_level ?? 5}
+                onChange={(v) => setA((p) => ({ ...p, stress_level: v }))}
                 step={1}
               />
             </View>
@@ -793,7 +797,7 @@ export default function AssessmentScreen() {
               }
             >
               <SoundPulse active={recordingFor === 'sound' || isRecording} />
-              {!isRecording && !a.soundCheck && (
+              {!isRecording && !assessment.sound_check && (
                 <View
                   style={{
                     position: 'absolute',
@@ -869,7 +873,7 @@ export default function AssessmentScreen() {
               }
             >
               <SoundPulse active={recordingFor === 'expression' || isRecording} />
-              {!isRecording && !a.expressionCheck && (
+              {!isRecording && !assessment.expression_check && (
                 <View
                   style={{
                     position: 'absolute',

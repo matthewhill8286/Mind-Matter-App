@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { useMoodStore } from '@/store/useMoodStore';
-import { useJournalStore } from '@/store/useJournalStore';
-import { useSleepStore } from '@/store/useSleepStore';
-import { useMindfulnessStore } from '@/store/useMindfulnessStore';
-import { useStressHistoryStore } from '@/store/useStressHistoryStore';
-import { useProfileStore } from '@/store/useProfileStore';
+import { moodStore } from '@/store/moodStore';
+import { journalStore } from '@/store/journalStore';
+import { sleepStore } from '@/store/sleepStore';
+import { mindfulnessStore } from '@/store/mindfulnessStore';
+import { stressHistoryStore } from '@/store/stressHistoryStore';
+import { profileStore } from '@/store/profileStore';
 import ScoreCard from '@/components/ScoreCard';
 import { SkeletonRect } from '@/components/Skeleton';
 import { UI } from '@/constants/theme';
@@ -14,12 +14,12 @@ import { calculateWellnessScore } from '@/lib/wellness';
 
 export default function ProfileCompletion() {
   const [loading, setLoading] = useState(true);
-  const { profile, assessment, fetchProfile, fetchAssessment } = useProfileStore();
-  const { moodCheckIns, fetchMoodCheckIns } = useMoodStore();
-  const { journalEntries, fetchJournalEntries } = useJournalStore();
-  const { sleepEntries, fetchSleepEntries } = useSleepStore();
-  const { mindfulnessHistory, fetchMindfulnessHistory } = useMindfulnessStore();
-  const { stressHistory, fetchStressHistory } = useStressHistoryStore();
+  const { profile, assessment, fetchProfile, fetchAssessment } = profileStore();
+  const { moodCheckIns, fetchMoodCheckIns } = moodStore();
+  const { journalEntries, fetchJournalEntries } = journalStore();
+  const { sleepEntries, fetchSleepEntries } = sleepStore();
+  const { mindfulnessHistory, fetchMindfulnessHistory } = mindfulnessStore();
+  const { stressHistory, fetchStressHistory } = stressHistoryStore();
 
   const allData = useMemo(
     () => ({

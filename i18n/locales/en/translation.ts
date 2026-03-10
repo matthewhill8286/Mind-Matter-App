@@ -192,7 +192,6 @@ export default {
     sleepQuality: 'Sleep Quality',
     prioritizeRest: 'Prioritize rest to boost your energy.',
     moodCheckIns: 'Mood check-ins',
-    moodTrends: 'Mood Trends',
     moodInsights: 'Insights',
     moodTrendingUp: 'Trending Up',
     moodTrendingDown: 'Trending Down',
@@ -273,7 +272,7 @@ export default {
   stress: {
     hubSubtitle: 'Quick tools for calming your body and clearing your mind.',
     yourStressKit: 'Your Stress Kit',
-    quickPhrase: 'Quick Phrase',
+    quick_phrase: 'Quick Phrase',
     defaultQuickPhrase: 'Take a deep breath. This too shall pass.',
     upgradeToUnlockPlan: 'Upgrade to lifetime access to unlock your stress plan.',
     upgradeToUnlockGrounding: 'Upgrade to lifetime access to unlock the grounding tool.',

@@ -30,6 +30,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (state) => {
+      console.log('state of the subscription', state);
       if (state === 'active') {
         await supabase.auth.startAutoRefresh();
       } else {

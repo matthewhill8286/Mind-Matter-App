@@ -1,11 +1,14 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authStore } from '@/store/authStore';
+import { useSubscription } from '@/hooks/useSubscription';
 
 export default function UpgradeRequired() {
-  async function signOut() {
-    await AsyncStorage.removeItem('auth:session:v1');
+  const { daysRemaining, isExpired } = useSubscription();
+
+  async function handleSignOut() {
+    await authStore.getState().signOut();
     router.replace('/(auth)/sign-in');
   }
 
@@ -19,7 +22,7 @@ export default function UpgradeRequired() {
         </Text>
         <Text style={{ opacity: 0.7, marginTop: 12, textAlign: 'center', lineHeight: 22 }}>
           Your 7-day free trial has come to an end. To continue using MindMatters and access your
-          data, please upgrade to lifetime access.
+          data, please upgrade to a paid plan.
         </Text>
 
         <Pressable
@@ -43,7 +46,7 @@ export default function UpgradeRequired() {
           </Text>
         </Pressable>
 
-        <Pressable onPress={signOut} style={{ marginTop: 20 }}>
+        <Pressable onPress={handleSignOut} style={{ marginTop: 20 }}>
           <Text style={{ color: '#6a5e55', fontWeight: '800', opacity: 0.6 }}>Sign out</Text>
         </Pressable>
       </View>

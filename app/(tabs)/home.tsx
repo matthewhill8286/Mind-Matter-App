@@ -8,12 +8,12 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Colors, UI } from '@/constants/theme';
 import { AFFIRMATIONS } from '@/constants/affirmations';
-import { useMoodStore } from '@/store/useMoodStore';
-import { useJournalStore } from '@/store/useJournalStore';
-import { useSleepStore } from '@/store/useSleepStore';
-import { useMindfulnessStore } from '@/store/useMindfulnessStore';
-import { useStressHistoryStore } from '@/store/useStressHistoryStore';
-import { useProfileStore } from '@/store/useProfileStore';
+import { moodStore } from '@/store/moodStore';
+import { journalStore } from '@/store/journalStore';
+import { sleepStore } from '@/store/sleepStore';
+import { mindfulnessStore } from '@/store/mindfulnessStore';
+import { stressHistoryStore } from '@/store/stressHistoryStore';
+import { profileStore } from '@/store/profileStore';
 
 import ScoreCard from '@/components/ScoreCard';
 import MoodChart from '@/components/MoodChart';
@@ -28,12 +28,12 @@ export default function Home() {
   const { isExpired } = useSubscription();
 
   const [loading, setLoading] = useState(true);
-  const { assessment, fetchAssessment } = useProfileStore();
-  const { moodCheckIns, fetchMoodCheckIns } = useMoodStore();
-  const { journalEntries, fetchJournalEntries } = useJournalStore();
-  const { sleepEntries, fetchSleepEntries } = useSleepStore();
-  const { mindfulnessHistory, fetchMindfulnessHistory } = useMindfulnessStore();
-  const { stressHistory, fetchStressHistory } = useStressHistoryStore();
+  const { assessment, fetchAssessment } = profileStore();
+  const { moodCheckIns, fetchMoodCheckIns } = moodStore();
+  const { journalEntries, fetchJournalEntries } = journalStore();
+  const { sleepEntries, fetchSleepEntries } = sleepStore();
+  const { mindfulnessHistory, fetchMindfulnessHistory } = mindfulnessStore();
+  const { stressHistory, fetchStressHistory } = stressHistoryStore();
 
   useEffect(() => {
     (async () => {

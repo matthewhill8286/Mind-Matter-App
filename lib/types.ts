@@ -1,12 +1,15 @@
 import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 
-export type MoodCheckIn = Tables<'moods'>;
-export type MoodCheckInInsert = TablesInsert<'moods'>;
-export type MoodCheckInUpdate = TablesUpdate<'moods'>;
+export type MoodCheckIn = Tables<'mood_logs'>;
+export type MoodCheckInInsert = TablesInsert<'mood_logs'>;
+export type MoodCheckInUpdate = TablesUpdate<'mood_logs'>;
 
-export type JournalEntry = Tables<'journals'>;
-export type JournalEntryInsert = TablesInsert<'journals'>;
-export type JournalEntryUpdate = TablesUpdate<'journals'>;
+export type JournalEntry = Tables<'journal_entries'>;
+export type JournalEntryInsert = TablesInsert<'journal_entries'>;
+export type JournalEntryUpdate = TablesUpdate<'journal_entries'>;
+
+export type JournalPrompt = Tables<'journal_prompts'>;
+export type Sport = Tables<'sports'>;
 
 export type StressKit = Tables<'stress_kits'>;
 export type StressKitInsert = TablesInsert<'stress_kits'>;
@@ -45,9 +48,9 @@ export type ChatMessage = {
 };
 
 export const DEFAULT_KIT: Partial<StressKit> = {
-  quickPhrase: 'This feeling will pass. I can take one small step.',
+  quick_phrase: 'This feeling will pass. I can take one small step.',
   triggers: ['Work pressure', 'Conflict', 'Uncertainty'],
-  helpfulActions: ['4-7-8 breathing', 'Short walk', 'Cold water on wrists'],
+  helpful_actions: ['4-7-8 breathing', 'Short walk', 'Cold water on wrists'],
   people: ['A friend', 'A family member'],
   notes: '',
   level: 5,

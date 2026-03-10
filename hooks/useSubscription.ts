@@ -1,34 +1,68 @@
-import { useProfileStore } from '@/store/useProfileStore';
+import { useEffect } from 'react';
+import { subscriptionStore, SubscriptionType } from '@/store/subscriptionStore';
 
-export type Subscription = {
-  type: 'trial' | 'monthly' | 'lifetime';
-  expiryDate?: string | null;
-};
+// Features that require an active subscription
+export type PremiumFeature =
+  | 'chat'
+  | 'journal'
+  | 'mood_tracking'
+  | 'sleep_tracking'
+  | 'stress_kit'
+  | 'mindfulness'
+  | 'insights';
+
+// Features available on the free/expired tier
+const FREE_FEATURES: PremiumFeature[] = ['mood_tracking'];
 
 export function useSubscription() {
-  const profile = useProfileStore((state) => state.profile);
+  const { type, expiryDate, status, loading, initialize, refresh } = subscriptionStore();
 
-  const subscription: Subscription | null = profile?.subscription_type
-    ? {
-        type: profile.subscription_type as Subscription['type'],
-        expiryDate: profile.subscription_expiry,
-      }
-    : null;
+  // Initialize realtime listener on first mount
+  useEffect(() => {
+    initialize();
+    return () => subscriptionStore.getState().cleanup();
+  }, [initialize]);
 
-  const isExpired =
-    subscription?.type === 'trial' &&
-    subscription?.expiryDate != null &&
-    new Date(subscription.expiryDate) < new Date();
+  const isExpired = status === 'expired';
+  const isLifetime = type === 'lifetime';
+  const isActive = status === 'active';
+  const hasFullAccess = isActive;
 
-  const isLifetime = subscription?.type === 'lifetime';
+  // Check if a specific feature is available
+  const canAccess = (feature: PremiumFeature): boolean => {
+    if (hasFullAccess) return true;
+    return FREE_FEATURES.includes(feature);
+  };
 
-  // A user has full access if they are lifetime OR in an active trial
-  const hasFullAccess = isLifetime || (subscription?.type === 'trial' && !isExpired);
+  // Days remaining on trial/monthly
+  const daysRemaining = (() => {
+    if (!expiryDate || type === 'lifetime') return null;
+    const diff = new Date(expiryDate).getTime() - Date.now();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  })();
 
   return {
-    subscription,
+    type,
+    expiryDate,
+    status,
+    loading,
     isExpired,
     isLifetime,
+    isActive,
     hasFullAccess,
+    canAccess,
+    daysRemaining,
+    refresh,
   };
+}
+
+// Non-hook version for use outside React components
+export function getSubscriptionStatus() {
+  const { type, expiryDate, status } = subscriptionStore.getState();
+  const hasFullAccess = status === 'active';
+  const canAccess = (feature: PremiumFeature): boolean => {
+    if (hasFullAccess) return true;
+    return FREE_FEATURES.includes(feature);
+  };
+  return { type, expiryDate, status, hasFullAccess, canAccess };
 }

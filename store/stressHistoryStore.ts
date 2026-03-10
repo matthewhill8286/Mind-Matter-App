@@ -2,9 +2,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StressCompletion, StressCompletionInsert } from '@/lib/types';
-import { syncToSupabase, getUserIdOrThrow } from '@/lib/supabase-sync';
 import { createLoadingSlice, LoadingState, SliceCreator } from '@/lib/zustand-helpers';
 import { supabase } from '@/lib/supabase';
+import { authStore } from '@/store/authStore';
+
+function getUserIdOrThrow(): string {
+  const { user } = authStore.getState();
+  if (!user) throw new Error('No user session found. Please sign in again.');
+  return user.id;
+}
 
 interface StressHistoryState {
   stressHistory: StressCompletion[];
@@ -54,9 +60,12 @@ const createStressHistorySlice: SliceCreator<
   },
 
   addStressCompletion: async (input) => {
-    const { data: result, error } = await syncToSupabase('stress_histories', input, {
-      matchColumn: 'id',
-    });
+    const userId = getUserIdOrThrow();
+    const { data: result, error } = await supabase
+      .from('stress_histories')
+      .upsert({ ...input, user_id: userId }, { onConflict: 'id' })
+      .select()
+      .single();
 
     if (error) throw new Error(typeof error === 'string' ? error : (error as any).message);
 
@@ -71,7 +80,7 @@ const createStressHistorySlice: SliceCreator<
   clearStressHistory: () => set({ stressHistory: [] }),
 });
 
-export const useStressHistoryStore = create<StressHistoryStore>()(
+export const stressHistoryStore = create<StressHistoryStore>()(
   persist(
     (set, get, api) => ({
       ...createStressHistorySlice(set, get, api),

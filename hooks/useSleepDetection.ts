@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { useSleepStore } from '@/store/useSleepStore';
+import { sleepStore } from '@/store/sleepStore';
 import { showAlert } from '@/lib/state';
 import { useRouter } from 'expo-router';
 
 export function useSleepDetection() {
-  const { sleepMode, setSleepMode } = useSleepStore();
+  const { sleepMode, setSleepMode } = sleepStore();
   const router = useRouter();
   const appState = useRef(AppState.currentState);
 

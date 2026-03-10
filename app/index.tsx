@@ -2,15 +2,16 @@ import { useEffect } from 'react';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, ActivityIndicator } from 'react-native';
-import { useProfileStore } from '@/store/useProfileStore';
+import { profileStore } from '@/store/profileStore';
 import { authStore } from '@/store/authStore';
+import { subscriptionStore } from '@/store/subscriptionStore';
 
-import { useMoodStore } from '@/store/useMoodStore';
-import { useSleepStore } from '@/store/useSleepStore';
-import { useJournalStore } from '@/store/useJournalStore';
-import { useStressStore } from '@/store/useStressStore';
+import { moodStore } from '@/store/moodStore';
+import { sleepStore } from '@/store/sleepStore';
+import { journalStore } from '@/store/journalStore';
+import { stressStore } from '@/store/stressStore';
 import { chatStore } from '@/store/chatStore';
-import { useMindfulnessStore } from '@/store/useMindfulnessStore';
+import { mindfulnessStore } from '@/store/mindfulnessStore';
 
 export default function Index() {
   useEffect(() => {
@@ -23,39 +24,47 @@ export default function Index() {
         if (!session) return router.replace('/(auth)/sign-in');
 
         // Use the store to fetch the latest profile and assessment
-        const { profile, assessment, fetchProfile, fetchAssessment } = useProfileStore.getState();
+        const { profile, assessment, fetchProfile, fetchAssessment } = profileStore.getState();
 
         if (!profile) await fetchProfile();
         if (!assessment) await fetchAssessment();
 
-        const latestProfile = useProfileStore.getState().profile;
-        const latestAssessment = useProfileStore.getState().assessment;
+        const latestProfile = profileStore.getState().profile;
+        const latestAssessment = profileStore.getState().assessment;
 
         console.log('profile data:', latestProfile);
         console.log('assessment data:', latestAssessment);
 
-        if (!latestProfile?.subscription_type) {
+        // Initialize subscription store and check status
+        await subscriptionStore.getState().initialize();
+        const { status, type: subType } = subscriptionStore.getState();
+
+        if (!subType) {
           return router.replace('/(auth)/trial-upgrade');
+        }
+
+        if (status === 'expired') {
+          return router.replace('/(auth)/upgrade-required');
         }
 
         // Fetch other data in parallel
         await Promise.allSettled([
-          useMoodStore.getState().fetchMoodCheckIns(),
-          useSleepStore.getState().fetchSleepEntries(),
-          useJournalStore.getState().fetchJournalEntries(),
-          useStressStore.getState().fetchStressKit(),
+          moodStore.getState().fetchMoodCheckIns(),
+          sleepStore.getState().fetchSleepEntries(),
+          journalStore.getState().fetchJournalEntries(),
+          stressStore.getState().fetchStressKit(),
           chatStore.getState().fetchAllHistories(),
-          useMindfulnessStore.getState().fetchMindfulnessHistory(),
+          mindfulnessStore.getState().fetchMindfulnessHistory(),
         ]);
 
         // Check for missing data
         if (!latestAssessment) return router.replace('/(onboarding)/assessment');
         if (!latestProfile) return router.replace('/(onboarding)/profile-setup');
 
-        // selectedIssues is now part of the profile in Supabase
+        // selected_issues is now part of the profile in Supabase
         if (
-          !latestProfile.selectedIssues ||
-          Object.keys(latestProfile?.selectedIssues).length === 0
+          !latestProfile.selected_issues ||
+          Object.keys(latestProfile?.selected_issues).length === 0
         ) {
           return router.replace('/(onboarding)/suggested-categories');
         }

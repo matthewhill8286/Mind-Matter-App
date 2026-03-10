@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
+import { calculateStreak } from '@/lib/mood-analysis';
 import type {
   MoodLog,
   MoodLogInsert,
@@ -262,32 +263,7 @@ export const useWellnessStore = create<WellnessState>((set, get) => ({
   },
 
   streak: () => {
-    const logs = get().recentLogs;
-    if (logs.length === 0) return 0;
-
-    let count = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Walk backwards from today
-    for (let i = 0; i <= 90; i++) {
-      const target = new Date(today);
-      target.setDate(target.getDate() - i);
-      const targetStr = target.toISOString().slice(0, 10);
-
-      const hasLog = logs.some((log) => log.logged_at.slice(0, 10) === targetStr);
-
-      if (hasLog) {
-        count++;
-      } else if (i === 0) {
-        // If today has no log yet, that's okay — check yesterday
-        continue;
-      } else {
-        break;
-      }
-    }
-
-    return count;
+    return calculateStreak(get().recentLogs);
   },
 
   // ─── Helpers ────────────────────────────────────────────
